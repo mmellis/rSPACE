@@ -32,7 +32,7 @@ plot.results<-function(key, CI=0.95, REML=T) {  # here 'key' should just be the 
       scale_colour_gradient(name = "# visits",guide="legend") +
       scale_linetype_discrete(name=expression(p["sim"]))+
       scale_y_continuous(limits=c(0,1))+
-      labs(x="Number of cells sampled", y="Detected trend/Number of runs", title=key$filename),
+      labs(x="Number of cells sampled", y="Detected trend/Number of runs", title=filename),
      vp=viewport(layout.pos.row=1,layout.pos.col=1))
      
     return(dta)
