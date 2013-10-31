@@ -1,0 +1,7 @@
+useDynLib(rSPACE)
+import(raster, rgdal, mnormt, RMark, ggplot2, plyr, grid, tcltk2)
+export(enter.parameters)
+export(create.landscapes)
+export(test_samples)
+export(test_file)
+export(encounter.history)
