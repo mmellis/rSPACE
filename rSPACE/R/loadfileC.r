@@ -25,7 +25,7 @@ is.loaded(c(sampling_fxn, use_fxn, wrapper_fxn, calc_prob, make_grid))
 smple <- function(map, use, N, buffer, wght=F){      #functions for individual calls to C++
    n = length(use)
    if(wght==T)
-    {  smp =  sample(n,n, prob=values(map)[use])-1  # Changed 8/8/2012: needs to be -1 to avoid bad reference in C++
+    {  smp =  sample(n,n, prob=raster::values(map)[use])-1  # Changed 8/8/2012: needs to be -1 to avoid bad reference in C++
     }else{ smp=  sample(n,n)-1 }
    x = coordinates(map)[use,1]
    y = coordinates(map)[use,2]
@@ -50,8 +50,8 @@ use_surface<-function(Wolv, howmuch, howfar, map, trunk = trunk){
 
                   as.double(coordinates(map)[,1]),                #x_snow
                   as.double(coordinates(map)[,2]),                #y_snow
-                  use = as.double(values(map)),                     #snow
-                  as.integer(length(values(map))),                        #pixels
+                  use = as.double(raster::values(map)),                     #snow
+                  as.integer(length(raster::values(map))),                        #pixels
                   
               as.double(c(sd_xy[,1])),                # double sd_long[]
               as.double(c(sd_xy[,2])),                # double sd_lat[]
@@ -95,8 +95,8 @@ wrapper<- function(snowlayer, N, MFratio, buffer, howmuch, howfar, grid_size, de
     USE = .C(wrapper_fxn,
               as.double(coordinates(snowlayer)[,1]),  # double x[]
               as.double(coordinates(snowlayer)[,2]),  # double y[]
-              as.double(values(snowlayer)),             # double snow[]
-              as.integer(length(values(snowlayer))),    # int *pixels
+              as.double(raster::values(snowlayer)),             # double snow[]
+              as.integer(length(raster::values(snowlayer))),    # int *pixels
               N = as.integer(round(N*MFratio)),                  #	int N[]
               as.double(buffer),                      #double buffer[]
               as.double(c(sd_xy[,1])),                # double sd_long[]
@@ -127,7 +127,7 @@ wrapper<- function(snowlayer, N, MFratio, buffer, howmuch, howfar, grid_size, de
 #make_grid(double x[], double y[], double *grid_size, int *pixels, int grid[])
 #filter_grid(int grid[], double snow[], double *cutoff, int *pixels, double *snow_cutoff)
 make.grid <- function(map, gridsize, cutoff, snow_cutoff, filtered=T){      #function for individual calls to C++
-   n = length(values(map))
+   n = length(raster::values(map))
    x = coordinates(map)[,1]
    y = coordinates(map)[,2]
 
@@ -141,7 +141,7 @@ make.grid <- function(map, gridsize, cutoff, snow_cutoff, filtered=T){      #fun
    if(filtered){
    USE = .C(filter_grid,
                   gridvec=as.integer(USE),          # grid vector
-                  as.double(values(map)),           # snow
+                  as.double(raster::values(map)),           # snow
                   as.double(cutoff),                # % snow to be included
                   as.integer(n),                    # #pixels
                   as.double(snow_cutoff)           # How much snow/habitat to be considered habitat (if(snow[i] >= *snow_cutoff))
@@ -154,10 +154,10 @@ make.grid <- function(map, gridsize, cutoff, snow_cutoff, filtered=T){      #fun
 #				double x[], double y[], double snow[], int *n_grps, double *lmda,
 #				double sd_long[], double sd_lat[])   
 reduce_pop <- function(Wolverines, pts, lmda, howmuch, howfar, trunk, snow_cutoff){      #function for individual calls to C++
-   n = length(values(pts))
+   n = length(raster::values(pts))
    N_wolv = length(Wolverines)
    n_grps = length(levels(Wolverines$sex))
-   snowpoints = which(values(pts) > snow_cutoff)
+   snowpoints = which(raster::values(pts) > snow_cutoff)
 
    IN = rep(0, n_grps*length(snowpoints))
    b = paste(coordinates(pts)[snowpoints,1],coordinates(pts)[snowpoints,2])
@@ -171,7 +171,7 @@ reduce_pop <- function(Wolverines, pts, lmda, howmuch, howfar, trunk, snow_cutof
    USE = .C(rd_pop,
               IN  = as.integer(IN),                       #int IN[]
               N   = as.integer(table(Wolverines$sex)),    #int N[]
-              use = as.double(values(pts)),               #double useTotal[]
+              use = as.double(raster::values(pts)),               #double useTotal[]
               as.integer(n),                              #int *pixels,
               as.integer(length(snowpoints)),             #int *snowpoints
               as.double(coordinates(pts)[,1]),            #double x[]
@@ -188,8 +188,8 @@ reduce_pop <- function(Wolverines, pts, lmda, howmuch, howfar, trunk, snow_cutof
 
 ### R Subfunctions #### 
 second.filter<-function(grid_layer, map1, map2, condition=1, cutoff=1){
-   map<-expand(map2, extent(map1),value=0)
-   V1<-table(grid_layer[values(map)>=condition])[-1]
+   map<-raster::extend(map2, extent(map1),value=0)
+   V1<-table(grid_layer[raster::values(map)>=condition])[-1]
    tmp<-as.numeric(names(V1)[V1>=cutoff*max(V1)])
    grid_layer[!(grid_layer %in% tmp)]=0
    return(grid_layer)

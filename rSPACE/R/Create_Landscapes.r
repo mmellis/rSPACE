@@ -4,10 +4,10 @@
 add.wolv<-function(dN, map, Parameters, wolv.df = NULL){
   if(is.null(Parameters$wghts)) Parameters$wghts=F
  if(is.null(wolv.df)){
-   use<-which(values(map)>=Parameters$HRcenter.cutoff)
+   use<-which(raster::values(map)>=Parameters$HRcenter.cutoff)
    new.wolv<-lapply(1:length(Parameters$MFratio), function(x) {use[smple(map,use,dN*Parameters$MFratio[x],Parameters$buffer[x],Parameters$wghts)]})
  } else {  
-   use<-sapply(1:length(Parameters$MFratio), function(x) {which(values(map)>Parameters$HRcenter.cutoff & values(distanceFromPoints(map, coordinates(map)[subset(wolv.df,sex==x)$locID,]))>Parameters$buffer[x])}) 
+   use<-sapply(1:length(Parameters$MFratio), function(x) {which(raster::values(map)>Parameters$HRcenter.cutoff & raster::values(distanceFromPoints(map, coordinates(map)[subset(wolv.df,sex==x)$locID,]))>Parameters$buffer[x])}) 
    new.wolv<-sapply(1:length(Parameters$MFratio), function(x) use[[x]][smple(map, use[[x]], round(dN*Parameters$MFratio[x]),Parameters$buffer[x])])      
   }
   return(new.wolv)
@@ -17,7 +17,7 @@ add.wolv<-function(dN, map, Parameters, wolv.df = NULL){
 drop.wolv<-function(dN, map, wolv.df, Parameters){
   if(is.null(Parameters$wghts)) Parameters$wghts=F
   if(Parameters$wghts==T){
-    drop.rows<-sample(nrow(wolv.df),dN, prob=values(map)[wolv.df$locID])
+    drop.rows<-sample(nrow(wolv.df),dN, prob=raster::values(map)[wolv.df$locID])
   } else { drop.rows<-sample(nrow(wolv.df),dN) }
     
   lost.wolv<-wolv.df[drop.rows,]
@@ -101,12 +101,12 @@ create.landscapes<-function(n_runs, map, filter.map=NULL, Parameters=NULL, base.
   if(is.null(Parameters$detP)) Parameters$detP=1
 
   # 2. Set up map + grid layer
-  values(map)[is.na(values(map))]=0
+  raster::values(map)[is.na(raster::values(map))]=0
 
   if(!is.null(filter.map)) {
     grid_layer<-make.grid(map, Parameters$grid_size, cutoff=0, filtered=F)
-    values(filter.map)<-c(1,0)[is.na(values(filter.map))+1]
-    grid_layer<-second.filter(grid_layer, filter.map, condition=1)
+    raster::values(filter.map)<-c(1,0)[is.na(raster::values(filter.map))+1]
+    grid_layer<-second.filter(grid_layer, map, filter.map, condition=1)
   } else {grid_layer<-make.grid(map, Parameters$grid_size, cutoff=snow.cutoff)}
   
   gridIDs<-unique(grid_layer)[unique(grid_layer)>0]
