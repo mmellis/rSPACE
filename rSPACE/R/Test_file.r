@@ -1,7 +1,6 @@
 ### Main function determining what MARK model is run, etc.
        
 test_file<-function(n_yrs, ch=NULL, n_visit=NULL, gap_yr=0, FPC=1, sample_matrix=NULL, xxx=1){
-  
   sim_results<-data.frame(p_est=0, trend=0, trendSE=0, matrix(0,1,n_yrs))
   if(is.null(ch)) return(sim_results)
 

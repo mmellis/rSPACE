@@ -1,6 +1,6 @@
 ## tclck2 package - testing for wolverine
 enter.parameters<-function(Parameters=NULL){
-require(tcltk2)
+
 tt <- tktoplevel()            # Create window
 tkwm.title(tt,"Parameters")   # Title
 
@@ -138,8 +138,7 @@ if(doneVal==1){
 }   
 
 tkdestroy(tt)
-detach(package:tcltk2)
-
 
 return(Parameters)
+#return('Hi!')
 }

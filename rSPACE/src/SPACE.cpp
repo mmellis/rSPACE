@@ -506,7 +506,7 @@ void wrapper(double x[], double y[], double snow[], int *pixels,
 				myfile << detection[j] << " ";
 			}
 			
-			myfile << endl;
+			myfile << "\n";
 
 			delete detection;
 			delete test_values;

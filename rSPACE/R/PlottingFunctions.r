@@ -1,14 +1,9 @@
 ### Subfunctions for analyzing output files with SPACE ###
-library(ggplot2)
-library(plyr)
-library(grid)
-
-
 ########## Subfunctions ################
 ## Summing %detected
 sum_data<-function(dta){
   dta<-dta[, !(grepl('trend',names(dta)) | grepl('X',names(dta)) | names(dta) %in% c('p_est','rn'))]
-  dta<-ddply(dta, names(dta)[!grepl("count",names(dta))], summarise,
+  dta<-plyr::ddply(dta, names(dta)[!grepl("count",names(dta))], summarise,
     total=sum(!is.na(count)),
     n_runs=length(count),
     count=sum(count, na.rm=T))
