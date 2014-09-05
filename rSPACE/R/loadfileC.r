@@ -128,7 +128,7 @@ wrapper<- function(snowlayer, N, MFratio, buffer, howmuch, howfar, grid_size, de
 
 #make_grid(double x[], double y[], double *grid_size, int *pixels, int grid[])
 #filter_grid(int grid[], double snow[], double *cutoff, int *pixels, double *snow_cutoff)
-make.grid <- function(map, gridsize, cutoff, snow_cutoff=NULL, filtered=T){      #function for individual calls to C++
+make.grid <- function(map, gridsize, cutoff=0, snow_cutoff=NULL, filtered=T){      #function for individual calls to C++
    n = length(getValues(map))
    x = coordinates(map)[,1]
    y = coordinates(map)[,2]

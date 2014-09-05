@@ -54,14 +54,14 @@ variance.components<-function(est, Trend_DM, vcv.est, REML=T){
      }
 }
 
-set_grid<-function(map, test_file, SubPop=NULL){
+set_grid<-function(map, filetest, SubPop=NULL){
  # Filter out cells that shouldn't be included.
   if(!is.null(SubPop)){
     map<-raster(SubPop,band=2)
     GRDuse <- unique(getValues(map))
     GRDuse <- GRDuse[which(GRDuse>0)] #drops NAs and 0s.
   } else {
-    test = read.delim(test_file,header=F, sep='*', as.is=T)
+    test = read.delim(filetest,header=F, sep='*', as.is=T)
     GRDuse = test$V2
   }
   return(GRDuse)
@@ -85,38 +85,49 @@ file_label<-function(filename){
 #######################################################################################
 
 ## Main loop function 
-test_samples<-function(main_wd, folder, Parameters, function_name="test_file",SubPop=NULL, sample_matrix=NULL, xxx=1, max_xxx=1, min_xxx=1, base.name="tmp",n_runs=NULL){
+test_samples<-function(folder, Parameters, ... ){
+  additional.args<-list(...)
+    function_name<-default.value(additional.args$function_name,"wolverine_analysis")
+    SubPop       <-additional.args$SubPop
+    sample_matrix<-additional.args$sample_matrix
+    xxx          <-default.value(additional.args$xxx,1)
+    max_xxx      <-default.value(additional.args$max_xxx,1)
+    min_xxx      <-default.value(additional.args$min_xxx,1)
+    base.name    <-default.value(additional.args$base.name, "rSPACEx")
+    n_runs       <-additional.args$n_runs
+    FPCind       <-default.value(additional.args$FPC, TRUE)
 
-  time1 = proc.time()[3]
-  
-  if(getwd() != paste(main_wd,folder,sep="/")) message('working directory does not match folder to test')
-  results_file<-paste(main_wd,'/',folder,'/',"sim_results", xxx, ".txt",sep="")
-  test_file<-get(function_name)
+  time1 = proc.time()[3] 
   
   n_visits<-Parameters$n_visits
   n_yrs<-Parameters$n_yrs
-  
-  #browser()
-  # Set up output file for results
-  sim_results<-test_file(n_yrs)
-  cat(c(names(sim_results),"n_grid","n_visits","detP","gap_yr","rn","\n"), file=results_file)
+  RunAnalysis<-get(function_name)
   
   # All encounter history files to test
-  output_files = dir(paste(main_wd,folder,sep="/"),pattern=base.name)
-  output_files = output_files[substr(output_files,1,nchar(base.name))==base.name]
-  output_files = paste(main_wd,folder,output_files,sep="/")
+  output_files = dir(folder, pattern=paste0('^',base.name),full.names=T)  
+
+  # Set up output folder/file for results
+  folder<-paste0(folder,'/output')
+  if(!file.exists(folder)) 
+    dir.create(folder)  
+  results_file<-paste(folder,"/sim_results", xxx, ".txt",sep="")
+  
+  sim_results<-RunAnalysis(n_yrs)
+  cat(c(names(sim_results),"n_grid","n_visits","detP","gap_yr","rn","\n"), 
+    file=results_file)
+  
   
   # Parameters to vary
   if(is.null(Parameters$n_visit_test)) Parameters$n_visit_test=2:Parameters$n_visits
   if(is.null(Parameters$detP_test))    Parameters$detP_test = c(1,0.8,0.2) 
-  if(is.null(Parameters$grid_sample))  Parameters$grid_sample=c(0.05, 0.15, 0.25, 0.35, 0.45, 0.55, 0.75, 0.95)
+  if(is.null(Parameters$grid_sample))  Parameters$grid_sample=c(0.05,0.15,0.25,0.35,0.45,0.55,0.75,0.95)
   if(is.null(Parameters$sample_yrs))   Parameters$sample_yrs<-c(0,1)
   
   GRDuse<-set_grid(map, output_files[1], SubPop)
   gridTotal<-length(GRDuse)
     
-   n_grid_sample = round(Parameters$grid_sample*gridTotal)
-   detP_test = adjust_detP(Parameters$detP_test,Parameters$detP)
+  n_grid_sample = round(Parameters$grid_sample*gridTotal)
+  detP_test = adjust_detP(Parameters$detP_test,Parameters$detP)
 
   
   #Main loop
@@ -124,7 +135,6 @@ test_samples<-function(main_wd, folder, Parameters, function_name="test_file",Su
   index<-rep(min_xxx:max_xxx,length.out=n_runs)
   for(rn in (1:n_runs)[index==xxx]){ 
   
-   #output_file = paste(main_wd,folder, output_files[rn],sep="/")
    test<-read.delim(output_files[rn] ,header=F, sep='*', as.is=T)
     GRD<-test$V2
    test<-substr(test[,3],3,(n_visits*n_yrs+2))
@@ -139,16 +149,19 @@ test_samples<-function(main_wd, folder, Parameters, function_name="test_file",Su
   for(n_grid in n_grid_sample){
     suppressWarnings(rm("ch1"))
     ch1<-test[use[1:n_grid]]    # only include data from grids in sample
+    fpc<-ifelse(FPCind, FPC(n_grid, gridTotal) ,1)  
 
     for(n_visit in Parameters$n_visit_test){
       suppressWarnings(rm("ch"))
       ch<-drop_visits(ch1, n_visits, n_yrs, n_visit) # drop data from extra visits
 
       for(gap_yr in Parameters$sample_yrs){
-        sim_results<-test_file(n_yrs, ch, n_visit, gap_yr, FPC(n_grid, gridTotal), sample_matrix,xxx)
+        sim_results<-RunAnalysis(n_yrs, ch, n_visit, gap_yr, fpc, ...)
         for(i in 1:nrow(sim_results)){
-        cat(c(unlist(sim_results[i,]),n_grid,n_visit,detPhold,gap_yr,file_label(output_files[rn]),'\n'), file=results_file,append=T)}
-        }}}}}
+          cat(c(unlist(sim_results[i,]),
+            n_grid,n_visit,detPhold,gap_yr,file_label(output_files[rn]),'\n'), 
+            file=results_file,append=T)
+        }}}}}}
         
   return(proc.time()[3]-time1)
 }

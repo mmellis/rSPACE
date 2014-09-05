@@ -5,7 +5,7 @@
 Creates a series of files with simulated encounter histories for using in a mark-recapture analysis based on population parameters.
 }
 \usage{
-create.landscapes(n_runs, map, filter.map = NULL, Parameters = NULL, base.name = "tmp", folder.dir=getwd())
+create.landscapes(n_runs, map, Paramters, ... )
 }
 
 \arguments{
@@ -15,28 +15,23 @@ number of replicate encounter histories to produce
   \item{map}{
 a raster layer with underlying habitat information
 }
-  \item{filter.map}{
-secondary raster layer indicating areas to include in sample
-}
   \item{Parameters}{
-list of parameter values for simulation (see \code{\link{enter.parameters}})
+list of parameter values for simulation 
+(see \code{\link{enter.parameters}})
 }
-  \item{base.name}{
-prefix to use for encounter history files (e.g., the default "tmp" creates files named "tmpXX.txt" where XX indexes the number of the run)
-}
-  \item{folder.dir}{
-full path of where to create output encounter history files
+  \item{...}{
+additional options
 }
 }
 \details{
-This function will produce \code{n_run} text files with simulated encounter histories.  Each individual file does not contain identifying information about the parameters used to create it, so it will be good practice to create a folder structure to keep separate simulations separate.  \code{folder.dir} must already exist.
+This function will produce \code{n_run} text files with simulated encounter histories.  Each individual file does not contain identifying information about the parameters used to create it, so it will be good practice to create a folder structure to keep separate simulations separate.  Default is to create a folder for the runs (./rSPACE_X) and name all encounter histories ./rSPACE_X/rSPACEx??.txt where ?? indicates the run number.  If \code{Paramters} is not specified, \code{\link{enter.parameters}} is called by default.
 
-\code{map} will define the landscape for the population simulation.  Values of \code{map} are used as weights for both selecting home range centers and scaling bivariate normal home ranges.
+\code{map} will define the landscape for the population simulation.  Values of \code{map} are used as weights for both selecting home range centers and scaling bivariate normal home ranges.  
 
-The optional \code{filter.map} defines the sampling frame for the population.  It must have either equal or smaller extent than \code{map}.  Areas to exclude from the sample should be marked as NA.    
+There are additional arguments that can be included to specify other options, but some are more sketchy than others.  
 }
 \value{
-list with directory location and list of output file names
+returns list with directory location and output file names
 }
 \author{
   Martha Ellis

@@ -1,8 +1,16 @@
-### Main function determining what MARK model is run, etc.
-       
-test_file<-function(n_yrs, ch=NULL, n_visit=NULL, gap_yr=0, FPC=1, sample_matrix=NULL, xxx=1){
+### Main function determining what MARK model is run, etc.       
+wolverine_analysis<-function(n_yrs, ch=NULL, n_visit=NULL, gap_yr=0, FPC=1, ...){
+## Run with ch=NULL to set up output  
   sim_results<-data.frame(p_est=0, trend=0, trendSE=0, matrix(0,1,n_yrs))
   if(is.null(ch)) return(sim_results)
+
+## If ch has a value, do the rest of it...
+  additional.args<-list(...)
+    sample_matrix<-additional.args$sample_matrix
+    xxx<-ifelse(is.null(additional.args$xxx),1,additional.args$xxx)
+  
+  folder<-get('folder', env=parent.frame())
+  MARKfile<-paste0(folder,"mark",LETTERS[xxx])
 
   if(gap_yr == 0){
           mark_data<-data.frame(ch=ch,freq=rep(1,length(ch)),stringsAsFactors=F)
@@ -16,7 +24,7 @@ test_file<-function(n_yrs, ch=NULL, n_visit=NULL, gap_yr=0, FPC=1, sample_matrix
             Epsilon.random.shared=list(formula=~-1+eps:time, share=TRUE)
           model.parameters=list(Epsilon=Epsilon.random.shared,p=p.session)
 
-          RDoccupancy=tryN(mark(test_processed,test_ddl,model.parameters=model.parameters,delete=T,output=F,prefix=paste("mark",LETTERS[xxx],sep='')))
+          RDoccupancy=tryN(mark(test_processed,test_ddl,model.parameters=model.parameters,delete=T,output=F,prefix=MARKfile))
                              
           derived_psi <- tryN(RDoccupancy$results$derived[,1])
           derived_psi_vcv <-tryN(RDoccupancy$results$derived.vcv)
@@ -42,7 +50,7 @@ test_file<-function(n_yrs, ch=NULL, n_visit=NULL, gap_yr=0, FPC=1, sample_matrix
             Epsilon.gapsampling=list(formula=~-1+gap, share=TRUE)
           model.parameters=list(Epsilon=Epsilon.gapsampling,p=p.session.fixed)
 
-          RDoccupancy=tryN(mark(test_processed,test_ddl,model.parameters=model.parameters,delete=T,output=F,prefix=paste("mark",LETTERS[xxx],sep='')))
+          RDoccupancy=tryN(mark(test_processed,test_ddl,model.parameters=model.parameters,delete=T,output=F,prefix=MARKfile))
           derived_psi <- tryN(RDoccupancy$results$derived[,1])
           derived_psi_vcv <-tryN(RDoccupancy$results$derived.vcv)
           P_est <-tryN(RDoccupancy$results$real$estimate[which(row.names(RDoccupancy$results$real)=="p g1 s1 t1")])
@@ -69,7 +77,7 @@ test_file<-function(n_yrs, ch=NULL, n_visit=NULL, gap_yr=0, FPC=1, sample_matrix
             Epsilon.random.shared=list(formula=~-1+eps:time, share=TRUE)
           model.parameters=list(Epsilon=Epsilon.random.shared,p=p.session)
 
-          RDoccupancy=tryN(mark(test_processed,test_ddl,model.parameters=model.parameters,delete=T,output=F,prefix=paste("mark",LETTERS[xxx],sep='')))
+          RDoccupancy=tryN(mark(test_processed,test_ddl,model.parameters=model.parameters,delete=T,output=F,prefix=MARKfile))
                              
           derived_psi <- tryN(RDoccupancy$results$derived[,1])
           derived_psi_vcv <-tryN(RDoccupancy$results$derived.vcv)

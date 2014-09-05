@@ -1,4 +1,5 @@
 ### Functions for creating encounter history files
+default.value<-function(x,val) ifelse(is.null(x),val,x) 
 
 # Add wolverines to simulation
 add.wolv<-function(dN, map, Parameters, wolv.df = NULL){
@@ -49,7 +50,7 @@ build.useLayer<-function(map, wolv, Parameters){
 }  
 
 # Main simulation function...simulate landscape and create encounter history
-encounter.history<-function(Parameters, map, grid_layer, n.cells){
+encounter.history<-function(Parameters, map, grid_layer, n.cells, printN=NULL){
   
   encounter_history<-matrix(0,nrow=n.cells, ncol=Parameters$n_yrs*Parameters$n_visits)
   ch.rplc<-lapply(seq(1,(Parameters$n_yrs)*Parameters$n_visits, by=Parameters$n_visits), function(x) x:(x+Parameters$n_visits-1)) 
@@ -91,38 +92,59 @@ if(Parameters$n_yrs>1){  # 5. Loop over years to fill in encounter_history
       P.pres[P.pres<0]=0
       encounter_history[,ch.rplc[[tt]]]<-replicate(Parameters$n_visits, rbinom(n=length(P.pres),size=1, prob=P.pres))
     
-    }} # End year loop (and if statement) 
-  cat(nrow(wolv.df),'\n',sep='',file="N_final.txt",append=T)  # Final population size
+    }} # End year loop (and if statement)
+  if(printN!=0) 
+    cat(nrow(wolv.df),'\n',sep='',file=printN,append=T)  # Final population size
   return(encounter_history)
 }  
 
 # Landscape wrapper
-create.landscapes<-function(n_runs, map, filter.map=NULL, Parameters=NULL, base.name='rSPACEx',run.label=NULL,folder.dir=getwd()){
+create.landscapes<-function(n_runs, map, Parameters, ... ){
+  # 0. Match argument list 
+  additional.args<-list(...)
+    folder.dir<-default.value(additional.args$folder.dir, getwd())    
+    run.label<- default.value(additional.args$run.label, 'rSPACE_X')
+    base.name<- default.value(additional.args$base.name, 'rSPACEx')
+    filter.map<-additional.args$filter.map
+    printN<-default.value(additional.args$printN, 1)  
+
+  # 0. Set up files
+   folder.dir <- paste(folder.dir, run.label, sep='/') 
+   if(!file.exists(folder.dir)) dir.create(folder.dir)
+   if(printN) printN<-paste0(folder.dir,'/N_final.txt')
+  
   # 1. Enter parameters
-  if(is.null(Parameters)) {Parameters<-enter.parameters()}
+  if(missing(Parameters)) {Parameters<-enter.parameters()}
   if(is.null(Parameters$detP)) Parameters$detP=1
 
   # 2. Set up map + grid layer
+  if(missing(map)) stop("Missing habitat layer")
+  if(grepl('+proj=utm.*',proj4string(map))) 
+    if(!grepl('+units=m',proj4string(map))) 
+      message('Assuming UTM +units=m')   
   map <- reclassify(map, cbind(NA, 0))
 
-  if(!is.null(filter.map)) {
-    grid_layer<-make.grid(map, Parameters$grid_size, cutoff=0, filtered=F)
-    filter.map<-setValues(filter.map, values=c(1,0)[is.na(getValues(filter.map))+1])
-    grid_layer<-second.filter(grid_layer, map, filter.map, condition=1)
-  } else {grid_layer<-make.grid(map, Parameters$grid_size, cutoff=Parameters$sample.cutoff, snow_cutoff=Parameters$HRcenter.cutoff)}
+  if(is.null(filter.map)) {
+    grid_layer<-make.grid(map, gridsize=Parameters$grid_size, 
+                  cutoff=Parameters$sample.cutoff, 
+                  snow_cutoff=Parameters$HRcenter.cutoff)
+  } else {
+    filter.map<-reclassify(filter.map, cbind(NA,0))
+    filter.map<-setValues(filter.map, ifelse(!(getValues(filter.map)==0),1,0))
+    
+    grid_layer<-make.grid(map, Parameters$grid_size, filtered=F)
+    grid_layer<-second.filter(grid_layer, map, filter.map)
+  }
   
   gridIDs<-unique(grid_layer)[unique(grid_layer)>0]
 
   # 3. Simulate encounter histories loop ##
   for(rn in 1:n_runs){
     cat(rn,'\n');flush.console()
-    encounter_history<-encounter.history(Parameters, map, grid_layer, length(gridIDs))
+    encounter_history<-encounter.history(Parameters, map, grid_layer, length(gridIDs), printN)
   
     # 4. Output encounter history
-   if(!is.null(run.label))
-     folder.dir<-paste(folder.dir, run.label, sep='/') 
-     
-   output_file = paste(folder.dir,'/',base.name,rn,".txt",sep='')
+    output_file<-paste(folder.dir,'/',base.name,rn,".txt",sep='')
     ch<-apply(encounter_history, 1, function(x) paste(x,collapse=""))
     cat(paste("/*", gridIDs, "*/", ch, "1;"), sep="\n",file=output_file) 
   } # End runs loop

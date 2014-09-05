@@ -29,6 +29,7 @@ importFrom(raster,
   getValues,
   setValues,
   reclassify,
+  res,
   pointDistance)
 importFrom(plyr,
   ddply)
@@ -37,5 +38,5 @@ importFrom(plyr,
 export(enter.parameters)
 export(create.landscapes)
 export(test_samples)
-export(test_file)
+export(wolverine_analysis)
 export(encounter.history)
