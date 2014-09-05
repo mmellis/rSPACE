@@ -40,8 +40,10 @@ wolv.dataframe<-function(wolv.list, map=NULL){
 # Create a use surface from a list of wolverine locations 
 build.useLayer<-function(map, wolv, Parameters){
   useLayer<-1-use_surface(wolv[[1]],Parameters$howmuch[1], Parameters$howfar[1], map, trunk = Parameters$trunk[1])
-  for(ii in 2:length(Parameters$MFratio)){ 
-    useLayer<-useLayer*(1-use_surface(wolv[[ii]],Parameters$howmuch[ii], Parameters$howfar[ii], map, trunk = Parameters$trunk[ii]))}
+  if(length(Parameters$MFratio)>1){
+    for(ii in 2:length(Parameters$MFratio)){ 
+      useLayer<-useLayer*(1-use_surface(wolv[[ii]],Parameters$howmuch[ii], Parameters$howfar[ii], map, trunk = Parameters$trunk[ii]))}
+  }
   useLayer<-1-useLayer 
   return(useLayer)
 }  
@@ -95,7 +97,7 @@ if(Parameters$n_yrs>1){  # 5. Loop over years to fill in encounter_history
 }  
 
 # Landscape wrapper
-create.landscapes<-function(n_runs, map, filter.map=NULL, Parameters=NULL, base.name='tmp',folder.dir=getwd()){
+create.landscapes<-function(n_runs, map, filter.map=NULL, Parameters=NULL, base.name='rSPACEx',run.label=NULL,folder.dir=getwd()){
   # 1. Enter parameters
   if(is.null(Parameters)) {Parameters<-enter.parameters()}
   if(is.null(Parameters$detP)) Parameters$detP=1
@@ -107,7 +109,7 @@ create.landscapes<-function(n_runs, map, filter.map=NULL, Parameters=NULL, base.
     grid_layer<-make.grid(map, Parameters$grid_size, cutoff=0, filtered=F)
     filter.map<-setValues(filter.map, values=c(1,0)[is.na(getValues(filter.map))+1])
     grid_layer<-second.filter(grid_layer, map, filter.map, condition=1)
-  } else {grid_layer<-make.grid(map, Parameters$grid_size, cutoff=snow.cutoff)}
+  } else {grid_layer<-make.grid(map, Parameters$grid_size, cutoff=Parameters$sample.cutoff, snow_cutoff=Parameters$HRcenter.cutoff)}
   
   gridIDs<-unique(grid_layer)[unique(grid_layer)>0]
 
@@ -117,6 +119,9 @@ create.landscapes<-function(n_runs, map, filter.map=NULL, Parameters=NULL, base.
     encounter_history<-encounter.history(Parameters, map, grid_layer, length(gridIDs))
   
     # 4. Output encounter history
+   if(!is.null(run.label))
+     folder.dir<-paste(folder.dir, run.label, sep='/') 
+     
    output_file = paste(folder.dir,'/',base.name,rn,".txt",sep='')
     ch<-apply(encounter_history, 1, function(x) paste(x,collapse=""))
     cat(paste("/*", gridIDs, "*/", ch, "1;"), sep="\n",file=output_file) 

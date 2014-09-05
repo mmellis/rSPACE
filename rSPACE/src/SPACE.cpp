@@ -13,7 +13,7 @@
 using namespace std;
 
 ///////////////////////////////////////////////////////////////
-// Calculate distance between two points
+// Calculate distance between two points using latlong coordinates
 ///////////////////////////////////////////////////////////////
 
 double rdist_earth(double long1, double lat1, double long2, double lat2)
@@ -43,6 +43,17 @@ double rdist_earth(double long1, double lat1, double long2, double lat2)
 		newdist = newdist/fabs(newdist);
 	newdist = R * acos(newdist);
 
+	return newdist;
+}
+
+///////////////////////////////////////////////////////////////
+// Calculate distance between two points using km
+///////////////////////////////////////////////////////////////
+
+double rdist_km(double x1, double y1, double x2, double y2)
+{	
+	double newdist;
+	newdist = sqrt(pow(x2-x1,2)+pow(y2-y1,2))/1000;
 	return newdist;
 }
 
@@ -188,7 +199,14 @@ void filter_grid(int grid[], double snow[], double *cutoff, int *pixels, double 
 extern "C" {
 void sample_ind(double x[], double y[], int *N, double *buffer, int use[], int *maxid, int new_order[])
 {
-
+  int longlat;
+  double (*rdist)(double, double, double, double);       
+  longlat=use[new_order[0]];  // Checks whether to use rdist_earth or rdist to calculate distances
+  if(longlat==1)
+    rdist = &rdist_earth;
+  else
+    rdist = &rdist_km;  
+    
 	use[new_order[0]] = 1; // Automatically include the first point in the sample = 1st wolverine
 	int ct = 1; // Number of individuals included so far
 	int id = 1; // Current individual to check
@@ -202,7 +220,7 @@ void sample_ind(double x[], double y[], int *N, double *buffer, int use[], int *
 		{
 			if(use[new_order[j]])					// Calculates distance to points included in the sample already
 			{
-				newdist = rdist_earth(x[new_order[j]], y[new_order[j]], x[new_order[id]], y[new_order[id]]);
+				newdist = rdist(x[new_order[j]], y[new_order[j]], x[new_order[id]], y[new_order[id]]);
 				if( newdist < mindist ) // Keeps track of the smallest distance with any other point.
 					mindist = newdist;
 			}
@@ -225,7 +243,7 @@ void sample_ind(double x[], double y[], int *N, double *buffer, int use[], int *
 extern "C" {
 void use_surface(double x_wolv[], double y_wolv[], int *N_wolv,
 		 double x[], double y[], double snow[], int *pixels,
-		 double *sd_long, double *sd_lat, double *trunc_cutoff)
+		 double *sd_x, double *sd_y, double *trunc_cutoff)
 {	
 
 	double *use = new double[*pixels]; //For the cumulative probability across all individuals.
@@ -243,8 +261,8 @@ void use_surface(double x_wolv[], double y_wolv[], int *N_wolv,
 		for(int px = 0; px < *pixels; px++)
 		{
 			//Bivariate normal formula, broken up.
-			term1 = pow((x[px] - x_wolv[wolv])/ *sd_long, 2) + pow((y[px] - y_wolv[wolv])/ *sd_lat, 2); 
-			term2 = 2* PI * *sd_long * *sd_lat;
+			term1 = pow((x[px] - x_wolv[wolv])/ *sd_x, 2) + pow((y[px] - y_wolv[wolv])/ *sd_y, 2); 
+			term2 = 2* PI * *sd_x * *sd_y;
 			term3 = log(term2);
 
 			use[px] = exp((term1 + 2 * term3)/(-2));
@@ -273,7 +291,7 @@ void use_surface(double x_wolv[], double y_wolv[], int *N_wolv,
 extern "C" {
 void reduce_pop(int IN[], int N[], double useTotal[], int *pixels, int *snowpoints,
 				double x[], double y[], double snow[], int *n_grps, double *lmda, 
-				double sd_long[], double sd_lat[], double trunc_cutoff[], double *snow_cutoff)
+				double sd_x[], double sd_y[], double trunc_cutoff[], double *snow_cutoff)
 {
 	int snow_ct = 0;
 	int N_wolv =0;
@@ -342,7 +360,7 @@ void reduce_pop(int IN[], int N[], double useTotal[], int *pixels, int *snowpoin
 		if(n_drop>0)
 		{
 			use_surface(x_wolv, y_wolv, &n_drop, 
-				x, y, use_tmp, pixels, &sd_long[j], &sd_lat[j], &trunc_cutoff[j]); 
+				x, y, use_tmp, pixels, &sd_x[j], &sd_y[j], &trunc_cutoff[j]); 
 			for(int i=0; i < *pixels; i++)
 			{
 				useTotal[i] = 1 - (1-useTotal[i]) / (1-use_tmp[i]);
@@ -387,138 +405,3 @@ void calc_prob(double use[], int grid[], int detection[], double *detectionP, in
 	delete det;
 }
 }
-
-///////////////////////////////////////////////////////////////
-// Wrapper function to run simulations over time
-///////////////////////////////////////////////////////////////
-extern "C" {
-void wrapper(double x[], double y[], double snow[], int *pixels,
-			 int N[], double buffer[], double sd_long[], double sd_lat[], int *n_grps,
-			 double *grid_size, double *detP, int *n_yrs, int *n_visits ,int *seed,
-			 double *cutoff, double *lmda, double trunc_cutoff[], double *snow_cutoff)
-{	
-	ofstream myfile;
-	myfile.open("output.txt");		
-	srand(*seed);			// seed for rand()
-
-	int i, j;
-	int snowpoints = 0;
-	int *grid = new int[*pixels];
-	for(i = 0; i < *pixels; i++){  
-		grid[i] = 0; //initialize grid, defaults to 0
-		if(snow[i] >= *snow_cutoff)  //EDITED >0.2
-			snowpoints++;  //count up #pixels with snow>1
-	}
-	
-	make_grid(x, y, grid_size, pixels, grid); //grid[] returns grid indices, grid_size returns max grid #
-	filter_grid(grid, snow, cutoff, pixels, snow_cutoff);  //grid[] returned with grids with total snow < cutoff set as 0
-	
-	int max_grid = int(*grid_size);
-	int *new_order = new int[snowpoints]; 
-	for(i = 0; i < snowpoints; i++)
-		new_order[i] = i;
-
-
-	double *use = new double[(*n_grps)*(*pixels)]; //use surface for each group (F, Mr, Mt)
-	int *IN = new int[(*n_grps)*(snowpoints)];	   //home range centers for each group (1 if included, 0 if not)
-	double *x_snow = new double[snowpoints];
-	double *y_snow = new double[snowpoints];
-
-	for(i = 0; i < *n_grps; i++) //loops over females, resident males, transient males.
-	{
-		int k = 0;
-		for(j=0; j < *pixels; j++) //Initialize IN & use, store snow points.
-		{
-			if(snow[j] >= *snow_cutoff)
-			{
-				IN[k + snowpoints * i] = 0;
-				if(i == 0)
-				{ 
-					x_snow[k] = x[j];
-					y_snow[k] = y[j]; 
-				}
-				k++;
-			}
-			use[j + *pixels * i] = snow[j]; //use gets initialized with snow values (used & edited in building use surfaces)
-		}
-			
-		for(j = 0; j< snowpoints; j++) //create random permutation of snowpoints.
-		{
-			int c = (int)((double)rand() / ((double)RAND_MAX + 1) * (snowpoints - j));
-			int t = new_order[j]; 
-			new_order[j] = new_order[j+c];
-			new_order[j+c] = t;
-		}
-
-		// sample home range centers, IN[] returns indicator of homerange centers, N returns the actual number of individuals fit.
-		sample_ind(x_snow, y_snow, &N[i], &buffer[i], &IN[i*(snowpoints)], &snowpoints, new_order);
-
-		double *x_wolv = new double[N[i]];
-		double *y_wolv = new double[N[i]];
-		
-		k = 0;
-		for(j = 0; j < snowpoints; j++)
-			if(IN[j + snowpoints * i])
-			{
-				x_wolv[k] = x_snow[j];
-				y_wolv[k] = y_snow[j];
-				k++;
-			}
-		//use returns the cumulative surface for all individuals sampled (by group)
-		use_surface(x_wolv, y_wolv, &N[i], x, y, &use[i*(*pixels)], pixels, &sd_long[i], &sd_lat[i],&trunc_cutoff[i]);
-		delete x_wolv;
-		delete y_wolv;
-	} //ends loop over groups
-	delete x_snow;
-	delete y_snow;
-
-	double *useTotal = new double[*pixels];
-	for(j = 0; j < *pixels; j++) // combine probabilities from all groups (F, Mr, Mt)
-	{
-		useTotal[j] = 1;
-		for(i = 0; i < *n_grps; i++)
-			useTotal[j] = useTotal[j] * (1 - use[j + *pixels * i]);
-		useTotal[j] = 1- useTotal[j];
-	}
-	delete use;
-	
-	for(int yr = 0; yr < *n_yrs; yr++) // Loop over years
-	{	
-		if(yr > 0)
-		{
-			reduce_pop(IN, N, useTotal, pixels, &snowpoints, x, y, snow, n_grps, lmda, sd_long, sd_lat, trunc_cutoff, snow_cutoff); 
-		}
-
-		for(int visit = 0; visit < *n_visits; visit++) // Loop over visits within a year
-		{
-			int *detection = new int[(max_grid + 1)];
-			double *test_values = new double[(max_grid + 1)];
-			for(i = 0; i < max_grid+1; i++)
-				test_values[i] = (double)rand()/(double)RAND_MAX; // random values to use for coin flip
-			//detection returned with 1/0s for detection/no detection in each grid.
-			calc_prob(useTotal, grid, detection, detP, pixels, &max_grid, test_values);
-
-			
-
-			//output detection histories to file
-			for(j = 1; j <= max_grid; j++)
-			{
-				myfile << detection[j] << " ";
-			}
-			
-			myfile << "\n";
-
-			delete detection;
-			delete test_values;
-		}
-	}
-
-	myfile.close();
-
-	delete IN;
-	delete grid;
-	delete new_order;
-	delete useTotal;
-}
-}
-

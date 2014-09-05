@@ -19,13 +19,17 @@ importFrom(grid,
   viewport,
   pushViewport,
   grid.layout)
+importFrom(sp,
+  coordinates,
+  proj4string)
 importFrom(raster,
   extend,
   extent,
   raster,
   getValues,
   setValues,
-  reclassify)
+  reclassify,
+  pointDistance)
 importFrom(plyr,
   ddply)
   
