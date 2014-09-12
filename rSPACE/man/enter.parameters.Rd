@@ -4,7 +4,7 @@
 Enter parameters
 }
 \description{
-Clicky box for help setting up a parameter list
+Dialogue box for help setting up a parameter list
 }
 \usage{
 enter.parameters(Parameters = NULL)

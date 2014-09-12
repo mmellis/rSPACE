@@ -5,6 +5,6 @@ Version: 1.0
 Date: 2013-01-10
 Author: Martha Ellis, Jake Ivan, Mike Schwartz
 Maintainer: Martha Ellis <martha.ellis@gmail.com>
-Description: This package provides subroutines necessary to run a spatially-explicit power analysis for detecting population trends through occupancy-based modeling.
+Description: This package provides subroutines to run a spatially-explicit power analysis for detecting population trends through occupancy-based modeling.
 License: GPL (>=2)
-Imports: raster, RMark, ggplot2, plyr, grid, tcltk2
+Imports: raster, RMark, ggplot2, tcltk2, sp, grid, plyr, tcltk

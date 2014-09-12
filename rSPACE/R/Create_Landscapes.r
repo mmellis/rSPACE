@@ -106,7 +106,8 @@ create.landscapes<-function(n_runs, map, Parameters, ... ){
     run.label<- default.value(additional.args$run.label, 'rSPACE_X')
     base.name<- default.value(additional.args$base.name, 'rSPACEx')
     filter.map<-additional.args$filter.map
-    printN<-default.value(additional.args$printN, 1)  
+    printN<-default.value(additional.args$printN, 1)
+    saveParameters<-default.value(additional.args$saveParameters, 1)  
 
   # 0. Set up files
    folder.dir <- paste(folder.dir, run.label, sep='/') 
@@ -148,6 +149,10 @@ create.landscapes<-function(n_runs, map, Parameters, ... ){
     ch<-apply(encounter_history, 1, function(x) paste(x,collapse=""))
     cat(paste("/*", gridIDs, "*/", ch, "1;"), sep="\n",file=output_file) 
   } # End runs loop
+  
+  if(saveParameters==1)
+    save(Parameters, file=paste0(folder.dir,'/Parameters.Rdata')
+    
   return(list(DIR = folder.dir, 
           filenames=paste0(base.name,1:n_runs,'.txt')))
 } # End function

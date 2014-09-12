@@ -10,7 +10,7 @@ wolverine_analysis<-function(n_yrs, ch=NULL, n_visit=NULL, gap_yr=0, FPC=1, ...)
     xxx<-ifelse(is.null(additional.args$xxx),1,additional.args$xxx)
   
   folder<-get('folder', env=parent.frame())
-  MARKfile<-paste0(folder,"mark",LETTERS[xxx])
+  MARKfile<-paste0("./mark",LETTERS[xxx])
 
   if(gap_yr == 0){
           mark_data<-data.frame(ch=ch,freq=rep(1,length(ch)),stringsAsFactors=F)
