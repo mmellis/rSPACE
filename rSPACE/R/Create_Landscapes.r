@@ -71,7 +71,8 @@ encounter.history<-function(Parameters, map, grid_layer, n.cells, printN=NULL){
  
 if(Parameters$n_yrs>1){  # 5. Loop over years to fill in encounter_history
    for(tt in 2:Parameters$n_yrs){
-       cat(nrow(wolv.df),' ',sep='',file="N_final.txt",append=T)  # Store population sizes by year
+      if(printN!=0)
+       cat(nrow(wolv.df),' ',sep='',file=printN,append=T)  # Store population sizes by year
       # 6. Calculate population change between t and t+1 
       if(length(Parameters$lmda)>1) {lmda.tt<-Parameters$lmda[tt-1]} else {lmda.tt<-Parameters$lmda}
       dN<-lmda.tt*nrow(wolv.df)-nrow(wolv.df)
@@ -93,8 +94,10 @@ if(Parameters$n_yrs>1){  # 5. Loop over years to fill in encounter_history
       encounter_history[,ch.rplc[[tt]]]<-replicate(Parameters$n_visits, rbinom(n=length(P.pres),size=1, prob=P.pres))
     
     }} # End year loop (and if statement)
+
   if(printN!=0) 
-    cat(nrow(wolv.df),'\n',sep='',file=printN,append=T)  # Final population size
+    cat(nrow(wolv.df),'\n',sep='',file=printN,append=T)  # Initial population size
+
   return(encounter_history)
 }  
 
@@ -117,6 +120,7 @@ create.landscapes<-function(n_runs, map, Parameters, ... ){
   # 1. Enter parameters
   if(missing(Parameters)) {Parameters<-enter.parameters()}
   if(is.null(Parameters$detP)) Parameters$detP=1
+  if(is.null(Parameters$trunk)) Parameters$trunk=rep(0,length(Parameters$MFratio))
 
   # 2. Set up map + grid layer
   if(missing(map)) stop("Missing habitat layer")
@@ -151,7 +155,7 @@ create.landscapes<-function(n_runs, map, Parameters, ... ){
   } # End runs loop
   
   if(saveParameters==1)
-    save(Parameters, file=paste0(folder.dir,'/Parameters.Rdata')
+    save(Parameters, file=paste0(folder.dir,'/Parameters.Rdata'))
     
   return(list(DIR = folder.dir, 
           filenames=paste0(base.name,1:n_runs,'.txt')))

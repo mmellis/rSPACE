@@ -30,7 +30,7 @@ smple <- function(map, use, N, buffer, wght=F){      #functions for individual c
    x = coordinates(map)[use,1]
    y = coordinates(map)[use,2]
    use10=rep(0,n)
-    use10[smp[1]]= as.numeric(grepl('+proj=longlat',proj4string(map)))  
+    use10[smp[1]+1]= as.numeric(grepl('+proj=longlat',proj4string(map)))  
    
    USE = .C(sampling_fxn,
                   as.double(x),               #Longitude
@@ -79,52 +79,7 @@ probPRES<-function(surface, gridvec, detP=1){
   #tmp = cbind(USE$use,USE$occP, tmp)
   return(USE)
   }
-  
-#void wrapper(double x[], double y[], double snow[], int *pixels,
-#			 int N[], double buffer[], double sd_x[], double sd_y[], int *n_grps,
-#			 double *grid_size, double *detP, int *n_yrs) 
-
-wrapper<- function(snowlayer, N, MFratio, buffer, howmuch, howfar, grid_size, detP, n_yrs, n_visits, cutoff, snow_cutoff, trunk ,lmda , output_file, seed = sample(10000,1)) {
-    start.time = proc.time()[3]
-    sd_xy<-var_solver(howmuch, howfar, map)
-    incP=F
-
-    if(lmda>1){
-      N = N * lmda^(n_yrs-1)
-      lmda = 1/lmda
-      incP = T}
-
-    USE = .C(wrapper_fxn,
-              as.double(coordinates(snowlayer)[,1]),  # double x[]
-              as.double(coordinates(snowlayer)[,2]),  # double y[]
-              as.double(getValues(snowlayer)),             # double snow[]
-              as.integer(length(getValues(snowlayer))),    # int *pixels
-              N = as.integer(round(N*MFratio)),                  #	int N[]
-              as.double(buffer),                      #double buffer[]
-              as.double(c(sd_xy[,1])),                # double sd_x[]
-              as.double(c(sd_xy[,2])),                # double sd_y[]
-              as.integer(length(MFratio)),            # int *n_grps
-              as.double(grid_size),                   #	double *grid_size
-              as.double(detP),                        # double *detP
-              as.integer(n_yrs),                      # int *n_yrs
-              as.integer(n_visits),                   # int *n_visits
-              as.integer(seed),            # seed to start RN generator
-              as.double(cutoff),                      # double *cutoff
-              as.double(lmda),                        # double *lmda
-              as.double(trunk),                       # double trunc_cutoff[]
-              as.double(snow_cutoff)                 # double snow_cutoff[]
-                )
-
-  input <- scan("output.txt")
-  input <- matrix(input, ncol=(n_yrs)*(n_visits))
-  if(incP) {input <- input[,rev(1:ncol(input))]}
-  input <- apply(input, 1, function(x) paste(x,collapse=""))
-
-  use<-unique(make.grid(snowlayer, grid_size, cutoff))[-1]
-  cat(paste("/*", use, "*/", input[use], "1;"), sep="\n",file=output_file)
-  cat("Time = ", (proc.time()[3]-start.time)/3600, " hours\n", sep="")
-  return(USE)
-  }
+    
 
 #make_grid(double x[], double y[], double *grid_size, int *pixels, int grid[])
 #filter_grid(int grid[], double snow[], double *cutoff, int *pixels, double *snow_cutoff)

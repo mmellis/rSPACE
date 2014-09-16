@@ -45,5 +45,5 @@ Martha Ellis, Jake Ivan
 }
 \references{ELLIS, MARTHA M., JACOB S. IVAN, and MICHAEL K. SCHWARTZ. "Spatially Explicit Power Analyses for Occupancy-Based Monitoring of Wolverine in the US Rocky Mountains." Conservation Biology (2013).}
 \seealso{
-\code{\link{test_file}}
+\code{\link{wolverine_analysis}}
 }

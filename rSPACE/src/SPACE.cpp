@@ -202,7 +202,7 @@ void sample_ind(double x[], double y[], int *N, double *buffer, int use[], int *
   int longlat;
   double (*rdist)(double, double, double, double);       
   longlat=use[new_order[0]];  // Checks whether to use rdist_earth or rdist to calculate distances
-  if(longlat==1)
+  if(longlat == 1)
     rdist = &rdist_earth;
   else
     rdist = &rdist_km;  
