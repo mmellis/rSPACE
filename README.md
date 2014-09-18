@@ -21,6 +21,7 @@ We are currently working to test and develop the code to be more generally acces
 
 3. For 64 bit Windows - download the zip binary from github to someplace handy.
   - This may be a little trickier than it seems.  If you click the handy "Download ZIP" button on the right there, you get the whole github folder.  Within that, the zip binary is the file labeled rSPACE_1.0.zip
+  - Better yet: Click on the rSPACE zip file in the file list above -> Click on 'View Raw' to download. 
 4. Install rSPACE package in R
   
     ````R
