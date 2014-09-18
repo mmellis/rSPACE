@@ -9,7 +9,7 @@ We are currently working to test and develop the code to be more generally acces
 
 
 
-##### Download steps
+##### Download steps if you just want to run the R package
 ---
 
 1. Make sure you have [Program MARK](http://www.phidot.org/software/mark/downloads/) and the most current version of [R](http://cran.us.r-project.org/) (or at least 3.0.1)
@@ -19,9 +19,8 @@ We are currently working to test and develop the code to be more generally acces
     install.packages(c("raster", "RMark", "ggplot2", "tcltk2"))
     ````
 
-3. For 64 bit Windows - download the zip binary from github to someplace handy.
-  - This may be a little trickier than it seems.  If you click the handy "Download ZIP" button on the right there, you get the whole github folder.  Within that, the zip binary is the file labeled rSPACE_1.0.zip
-  - Better approach: Click on the rSPACE zip file in the file list above, then click on 'View Raw' to download. 
+3. For 64 bit Windows: download the zip file in the above list to someplace handy.
+    - Click [here](https://github.com/mmellis/rSPACE/blob/master/rSPACE_1.0.zip) or on the rSPACE_1.0.zip file above, then click on 'View Raw' to download.
 4. Install rSPACE package in R
   
     ````R
