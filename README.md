@@ -1,11 +1,17 @@
-# rSPACE
+rSPACE
+====
 
 Power analysis for detecting trends in population abundance using occupancy-based monitoring.  A simple, spatially explicit population simulation is used to create sample datasets with which to assess power.
 
 We are currently working to test and develop the code to be more generally accessible.  If you have questions concerning how to implement rSPACE or if there are features that you would like to see added (or if you have any other feedback on the current implementation), please contact us.  Thanks for your patience as we work through the bugs!
 
 
-###### Download steps for rSPACE
+
+
+
+##### Download steps
+---
+
 1. Make sure you have [Program MARK](http://www.phidot.org/software/mark/downloads/) and the most current version of [R](http://cran.us.r-project.org/) (or at least 3.0.1)
 2. Install package dependencies in R
 
