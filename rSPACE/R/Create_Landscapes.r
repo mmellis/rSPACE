@@ -127,7 +127,8 @@ create.landscapes<-function(n_runs, map, Parameters, ... ){
   if(grepl('+proj=utm.*',proj4string(map))) 
     if(!grepl('+units=m',proj4string(map))) 
       message('Assuming UTM +units=m')   
-  map <- reclassify(map, cbind(NA, 0))
+  map <- reclassify(map, cbind(c(NA), c(0)))
+  if(any(is.nan(getValues(map)))) stop('NaNs in habitat map')
 
   if(is.null(filter.map)) {
     grid_layer<-make.grid(map, gridsize=Parameters$grid_size, 

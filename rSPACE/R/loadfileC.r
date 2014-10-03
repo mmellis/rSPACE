@@ -175,10 +175,10 @@ make.grid.utm<-function(map, gridsize){
   n_cells<-(map_xy-skip_xy) %/% nxy
   
   grid_layer<-expand.grid(x=1:map_xy[1], y=1:map_xy[2], value=0)
-  keeppixels<-(grid_layer$x >= floor(skip_xy[1]/2)) & 
-              (grid_layer$x < map_xy[1]-ceiling(skip_xy[1]/2)) &
-              (grid_layer$y >= floor(skip_xy[2]/2)) & 
-              (grid_layer$y < map_xy[2]-ceiling(skip_xy[2]/2))
+  keeppixels<-(grid_layer$x > floor(skip_xy[1]/2)) &
+              (grid_layer$x <= map_xy[1]-ceiling(skip_xy[1]/2)) &
+              (grid_layer$y > floor(skip_xy[2]/2)) &
+              (grid_layer$y <= map_xy[2]-ceiling(skip_xy[2]/2))
   grid_layer$value[keeppixels]<-
     rep(rep(rep(1:n_cells[1], each=nxy[1]),nxy[2]), n_cells[2])+
     rep(seq(from=0,by=n_cells[1], length.out=n_cells[2]), each=(n_cells[1]*nxy[1]*nxy[2]))
