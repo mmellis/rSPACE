@@ -54,9 +54,9 @@ variance.components<-function(est, Trend_DM, vcv.est, REML=T){
      }
 }
 
-set_grid<-function(map, filetest, SubPop=NULL){
+set_grid<-function(filetest, SubPop=NULL){
  # Filter out cells that shouldn't be included.
-  if(!is.null(SubPop)){
+  if(!is.null(SubPop)){    ## SubPop should be a raster with the previous grid layer filtered to a subregion.
     map<-raster(SubPop,band=2)
     GRDuse <- unique(getValues(map))
     GRDuse <- GRDuse[which(GRDuse>0)] #drops NAs and 0s.
@@ -96,6 +96,19 @@ test_samples<-function(folder, Parameters, ... ){
     base.name    <-default.value(additional.args$base.name, "rSPACEx")
     n_runs       <-additional.args$n_runs
     FPCind       <-default.value(additional.args$FPC, TRUE)
+    skipConfirm  <-default.value(additional.args$skipConfirm, F)
+
+
+   if(!skipConfirm){
+      askConfirm<-("" ==readline(prompt="\n rSPACE creates text files.
+        If you're ok with this, press ENTER to continue.
+        Typing anything else will exit.\n"))
+      if(!askConfirm)
+      { message('Exiting function')
+        return(0)
+      }
+   }
+
 
   time1 = proc.time()[3] 
   
@@ -123,7 +136,7 @@ test_samples<-function(folder, Parameters, ... ){
   if(is.null(Parameters$grid_sample))  Parameters$grid_sample=c(0.05,0.15,0.25,0.35,0.45,0.55,0.75,0.95)
   if(is.null(Parameters$sample_yrs))   Parameters$sample_yrs<-c(0,1)
   
-  GRDuse<-set_grid(map, output_files[1], SubPop)
+  GRDuse<-set_grid(output_files[1], SubPop)
   gridTotal<-length(GRDuse)
     
   n_grid_sample = round(Parameters$grid_sample*gridTotal)

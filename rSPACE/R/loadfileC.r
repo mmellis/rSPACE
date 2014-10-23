@@ -148,7 +148,6 @@ reduce_pop <- function(Wolverines, pts, lmda, howmuch, howfar, trunk, snow_cutof
 
 ### R Subfunctions #### 
 second.filter<-function(grid_layer, map1, map2, condition=1, cutoff=1){
-   map<-extend(map2, extent(map1),value=0)
    V1<-table(grid_layer[getValues(map)>=condition])[-1]
    tmp<-as.numeric(names(V1)[V1>=cutoff*max(V1)])
    grid_layer[!(grid_layer %in% tmp)]=0

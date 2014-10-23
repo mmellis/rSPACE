@@ -30,7 +30,8 @@ importFrom(raster,
   setValues,
   reclassify,
   res,
-  pointDistance)
+  pointDistance,
+  distanceFromPoints)
 importFrom(plyr,
   ddply)
   

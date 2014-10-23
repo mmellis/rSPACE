@@ -4,11 +4,11 @@ default.value<-function(x,val) ifelse(is.null(x),val,x)
 # Add wolverines to simulation
 add.wolv<-function(dN, map, Parameters, wolv.df = NULL){
   if(is.null(Parameters$wghts)) Parameters$wghts=F
- if(is.null(wolv.df)){
+  if(is.null(wolv.df)){
    use<-which(getValues(map)>=Parameters$HRcenter.cutoff)
    new.wolv<-lapply(1:length(Parameters$MFratio), function(x) {use[smple(map,use,dN*Parameters$MFratio[x],Parameters$buffer[x],Parameters$wghts)]})
  } else {  
-   use<-sapply(1:length(Parameters$MFratio), function(x) {which(getValues(map)>Parameters$HRcenter.cutoff & getValues(distanceFromPoints(map, coordinates(map)[subset(wolv.df,sex==x)$locID,]))>Parameters$buffer[x])}) 
+   use<-sapply(1:length(Parameters$MFratio), function(x) {which(getValues(map)>=Parameters$HRcenter.cutoff & getValues(distanceFromPoints(map, coordinates(map)[subset(wolv.df,sex==x)$locID,]))>Parameters$buffer[x])}) 
    new.wolv<-sapply(1:length(Parameters$MFratio), function(x) use[[x]][smple(map, use[[x]], round(dN*Parameters$MFratio[x]),Parameters$buffer[x])])      
   }
   return(new.wolv)
@@ -110,9 +110,20 @@ create.landscapes<-function(n_runs, map, Parameters, ... ){
     base.name<- default.value(additional.args$base.name, 'rSPACEx')
     filter.map<-additional.args$filter.map
     printN<-default.value(additional.args$printN, 1)
-    saveParameters<-default.value(additional.args$saveParameters, 1)  
+    saveParameters<-default.value(additional.args$saveParameters, 1)
+    skipConfirm<-default.value(additional.args$skipConfirm, F)
 
   # 0. Set up files
+   if(!skipConfirm){
+      askConfirm<-("" ==readline(prompt="\n rSPACE creates text files.
+        If you're ok with this, press ENTER to continue.
+        Typing anything else will exit.\n"))
+      if(!askConfirm){
+        message('Exiting function')
+        return(0)
+      }
+   }
+
    folder.dir <- paste(folder.dir, run.label, sep='/') 
    if(!file.exists(folder.dir)) dir.create(folder.dir)
    if(printN) printN<-paste0(folder.dir,'/N_final.txt')
@@ -135,11 +146,14 @@ create.landscapes<-function(n_runs, map, Parameters, ... ){
                   cutoff=Parameters$sample.cutoff, 
                   snow_cutoff=Parameters$HRcenter.cutoff)
   } else {
-    filter.map<-reclassify(filter.map, cbind(NA,0))
-    filter.map<-setValues(filter.map, ifelse(!(getValues(filter.map)==0),1,0))
-    
-    grid_layer<-make.grid(map, Parameters$grid_size, filtered=F)
-    grid_layer<-second.filter(grid_layer, map, filter.map)
+    filter.map <- reclassify(filter.map, cbind(NA, 0))
+    filter.map <- extend(filter.map, extent(map), value=0)
+    if(any(is.nan(getValues(filter.map)))) stop('NaNs in filter map')
+
+    if(all(getValues(filter.map) %in% c(0,1))){
+      grid_layer<-make.grid(map, Parameters$grid_size, filtered=F)
+      grid_layer<-second.filter(grid_layer, map, filter.map)
+    }else{ grid_layer<-getValues(filter.map) }
   }
   
   gridIDs<-unique(grid_layer)[unique(grid_layer)>0]
