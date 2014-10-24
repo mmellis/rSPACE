@@ -1,88 +1,85 @@
-##### Subfunctions ##################################################################
-switcheroo<-function(x,detP) {
-  for(i in 1:length(x)){
-    if(x[i]=="1"){if(rbinom(1,1,prob=detP)==0) {x[i]="0"}}
-    }
-    return(x)
-  }
-time_int<-function(n_visit, n_yrs){
-  tmp<-rep(0,n_visit)
-  tmp[n_visit] = 1
-  tmp<-rep(tmp,n_yrs)
-  return(tmp[-n_yrs*n_visit])}
-
-drop_visits<-function(ch, n_visits, n_yrs, n_visit){
-  tmp<-rep(F,n_visits)
-  tmp[1:n_visit]=T
-  tmp<-rep(tmp,n_yrs)
-  unlist(lapply(strsplit(ch,split=""),function(x) paste(x[tmp], collapse="")))
-  }
-
-drop_years <- function(ch, n_visits, dropvec=rep(c(F,T),length.out=nchar(ch[1])/n_visits), samples=NULL){
-  dropvec<-matrix(dropvec, ncol=length(dropvec),nrow=length(ch), byrow=T)
-  if(!is.null(samples)){
-    smple<-sample(nrow(samples), length(ch), replace=T)
-    dropvec<-matrix(as.logical(as.matrix(samples[smple,])),nrow=nrow(dropvec))
-  }
-#    ch <- unlist(lapply(strsplit(ch, split=""), function(x) {
-#      x[rep(dropvec,each=n_visits)]="."
-#      paste(x,collapse="")} ))
-    ch_split<-strsplit(ch, split='')
-    ch <- unlist(sapply(1:length(ch), function(x) {
-      ch_split[[x]][rep(dropvec[x,],each=n_visits)]="."
-      paste(ch_split[[x]],collapse="")} ))
-  if(is.null(samples)) {ch<-substr(ch,1,nchar(ch)-n_visits)}
-  return(ch)}
-
-drop_detP <-function(ch, detP) {unlist(lapply(strsplit(ch,split=""),function(x) paste(switcheroo(x,detP), collapse="")))}
-
-FPC <- function(n, N, use=T) {if(use==T) return((N-n)/N) else return(1)}
-
-FPC_trendSE<-function(Random.effects.model, k, FPC){
-  trendSE<-Random.effects.model$beta[2,2]
-  process.variance<-Random.effects.model$sigma^2
-  sampling.variance<-k*trendSE^2 - process.variance
-  trendSE<-sqrt((process.variance+FPC*sampling.variance)/k)
-  return(trendSE)
-  }
-
-variance.components<-function(est, Trend_DM, vcv.est, REML=T){
-   if(REML==T) {
-     return(var.components.reml(est,design=Trend_DM,vcv.est))
-     } else {
-     return(var.components(est,design=Trend_DM,vcv.est))
-     }
-}
-
-set_grid<-function(filetest, SubPop=NULL){
- # Filter out cells that shouldn't be included.
-  if(!is.null(SubPop)){    ## SubPop should be a raster with the previous grid layer filtered to a subregion.
-    map<-raster(SubPop,band=2)
-    GRDuse <- unique(getValues(map))
-    GRDuse <- GRDuse[which(GRDuse>0)] #drops NAs and 0s.
-  } else {
-    test = read.delim(filetest,header=F, sep='*', as.is=T)
-    GRDuse = test$V2
-  }
-  return(GRDuse)
-  }
-  
-adjust_detP<-function(detP_test,detP1=1){
-  n<-length(detP_test)
-  detP_test<-detP_test/c(detP1,detP_test)[-(n+1)]
-  return(detP_test)
-  }  
-  
-tryN<-function(expr){ tryCatch(expr, error=function(e) return(NULL)) }
-
-file_label<-function(filename){
-  filename<-unlist(lapply(strsplit(filename,'/'),function(x) rev(x)[1]))
-  filename<-gsub('.txt','',filename)
-  return(filename)
-}
-  
-         
-#######################################################################################
+##### Subfunctions #############################################################
+switcheroo<-function(x,detP) {                                                 #
+  for(i in 1:length(x)){                                                       #
+    if(x[i]=="1"){if(rbinom(1,1,prob=detP)==0) {x[i]="0"}}                     #
+    }                                                                          #
+    return(x)                                                                  #
+  }                                                                            #
+time_int<-function(n_visit, n_yrs){                                            #
+  tmp<-rep(0,n_visit)                                                          #
+  tmp[n_visit] = 1                                                             #
+  tmp<-rep(tmp,n_yrs)                                                          #
+  return(tmp[-n_yrs*n_visit])}                                                 #
+                                                                               #
+drop_visits<-function(ch, n_visits, n_yrs, n_visit){                           #
+  tmp<-rep(F,n_visits)                                                         #
+  tmp[1:n_visit]=T                                                             #
+  tmp<-rep(tmp,n_yrs)                                                          #
+  unlist(lapply(strsplit(ch,split=""),function(x) paste(x[tmp], collapse=""))) #
+  }                                                                            #
+                                                                               #
+drop_years <- function(ch, n_visits, dropvec=rep(c(F,T),                       #
+                length.out=nchar(ch[1])/n_visits), samples=NULL){              #
+  dropvec<-matrix(dropvec, ncol=length(dropvec),nrow=length(ch), byrow=T)      #
+  if(!is.null(samples)){                                                       #
+    smple<-sample(nrow(samples), length(ch), replace=T)                        #
+    dropvec<-matrix(as.logical(as.matrix(samples[smple,])),nrow=nrow(dropvec)) #
+  }                                                                            #
+#    ch <- unlist(lapply(strsplit(ch, split=""), function(x) {                 #
+#      x[rep(dropvec,each=n_visits)]="."                                       #
+#      paste(x,collapse="")} ))                                                #
+    ch_split<-strsplit(ch, split='')                                           #
+    ch <- unlist(sapply(1:length(ch), function(x) {                            #
+      ch_split[[x]][rep(dropvec[x,],each=n_visits)]="."                        #
+      paste(ch_split[[x]],collapse="")} ))                                     #
+  if(is.null(samples)) {ch<-substr(ch,1,nchar(ch)-n_visits)}                   #
+  return(ch)}                                                                  #
+                                                                               #
+drop_detP <-function(ch, detP) {                                               #
+  unlist(lapply(strsplit(ch,split=""),                                         #
+    function(x) paste(switcheroo(x,detP), collapse="")))}                      #
+                                                                               #
+FPC <- function(n, N, use=T) {if(use==T) return((N-n)/N) else return(1)}       #
+                                                                               #
+                                                                               #
+variance.components<-function(est, Trend_DM, vcv.est, REML=T){                 #
+   if(REML==T) {                                                               #
+     return(var.components.reml(est,design=Trend_DM,vcv.est))                  #
+     } else {                                                                  #
+     return(var.components(est,design=Trend_DM,vcv.est))                       #
+     }                                                                         #
+}                                                                              #
+                                                                               # 
+set_grid<-function(filetest, SubPop=NULL){                                     #
+ # Filter out cells that shouldn't be included.                                #
+ # SubPop should be a raster with the previous grid layer                      #
+ #  filtered to a subregion.                                                   #
+  if(!is.null(SubPop)){                                                        #
+    map<-raster(SubPop,band=2)                                                 #
+    GRDuse <- unique(getValues(map))                                           #
+    GRDuse <- GRDuse[which(GRDuse>0)] #drops NAs and 0s.                       #
+  } else {                                                                     #
+    test = read.delim(filetest,header=F, sep='*', as.is=T)                     #
+    GRDuse = test$V2                                                           #
+  }                                                                            #
+  return(GRDuse)                                                               #
+  }                                                                            #
+                                                                               #
+adjust_detP<-function(detP_test,detP1=1){                                      #
+  n<-length(detP_test)                                                         #
+  detP_test<-detP_test/c(detP1,detP_test)[-(n+1)]                              #
+  return(detP_test)                                                            #
+  }                                                                            #
+                                                                               #
+                                                                               #
+file_label<-function(filename){                                                #
+  filename<-unlist(lapply(strsplit(filename,'/'),function(x) rev(x)[1]))       #
+  filename<-gsub('.txt','',filename)                                           #
+  return(filename)                                                             #
+}                                                                              #
+                                                                               #
+                                                                               #
+################################################################################
 
 ## Main loop function 
 test_samples<-function(folder, Parameters, ... ){

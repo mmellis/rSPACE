@@ -7,9 +7,9 @@ add.wolv<-function(dN, map, Parameters, wolv.df = NULL){
   if(is.null(wolv.df)){
    use<-which(getValues(map)>=Parameters$HRcenter.cutoff)
    new.wolv<-lapply(1:length(Parameters$MFratio), function(x) {use[smple(map,use,dN*Parameters$MFratio[x],Parameters$buffer[x],Parameters$wghts)]})
- } else {  
-   use<-sapply(1:length(Parameters$MFratio), function(x) {which(getValues(map)>=Parameters$HRcenter.cutoff & getValues(distanceFromPoints(map, coordinates(map)[subset(wolv.df,sex==x)$locID,]))>Parameters$buffer[x])}) 
-   new.wolv<-sapply(1:length(Parameters$MFratio), function(x) use[[x]][smple(map, use[[x]], round(dN*Parameters$MFratio[x]),Parameters$buffer[x])])      
+  } else {
+   use<-lapply(1:length(Parameters$MFratio), function(x) {which(getValues(map)>=Parameters$HRcenter.cutoff & getValues(distanceFromPoints(map, coordinates(map)[wolv.df[wolv.df$sex==x,]$locID,]))>Parameters$buffer[x])}) 
+   new.wolv<-lapply(1:length(Parameters$MFratio), function(x) use[[x]][smple(map, use[[x]], round(dN*Parameters$MFratio[x]),Parameters$buffer[x])])      
   }
   return(new.wolv)
 }
@@ -50,26 +50,26 @@ build.useLayer<-function(map, wolv, Parameters){
 }  
 
 # Main simulation function...simulate landscape and create encounter history
-encounter.history<-function(Parameters, map, grid_layer, n.cells, printN=NULL){
+encounter.history<-function(Parameters, map, grid_layer, n.cells, printN=0){
   
   encounter_history<-matrix(0,nrow=n.cells, ncol=Parameters$n_yrs*Parameters$n_visits)
   ch.rplc<-lapply(seq(1,(Parameters$n_yrs)*Parameters$n_visits, by=Parameters$n_visits), function(x) x:(x+Parameters$n_visits-1)) 
 
   # 1. Place individuals
- wolv<-add.wolv(Parameters$N, map, Parameters)
- wolv.df<-wolv.dataframe(wolv)
+  wolv<-add.wolv(Parameters$N, map, Parameters)
+  wolv.df<-wolv.dataframe(wolv)
 
   # 2. Make use surface
- useLayer<-build.useLayer(map, wolv, Parameters)
+  useLayer<-build.useLayer(map, wolv, Parameters)
   
   # 3. Calculate probability by grid
- P.pres<-probPRES(useLayer, grid_layer)
- P.pres[P.pres<0]=0
+  P.pres<-probPRES(useLayer, grid_layer)
+  P.pres[P.pres<0]=0
  
   # 4. Sample detections in the first year
- encounter_history[,ch.rplc[[1]]]<-replicate(Parameters$n_visits, rbinom(n=length(P.pres),size=1, prob=P.pres))
+  encounter_history[,ch.rplc[[1]]]<-replicate(Parameters$n_visits, rbinom(n=length(P.pres),size=1, prob=P.pres))
  
-if(Parameters$n_yrs>1){  # 5. Loop over years to fill in encounter_history
+  if(Parameters$n_yrs>1){  # 5. Loop over years to fill in encounter_history
    for(tt in 2:Parameters$n_yrs){
       if(printN!=0)
        cat(nrow(wolv.df),' ',sep='',file=printN,append=T)  # Store population sizes by year
@@ -126,7 +126,12 @@ create.landscapes<-function(n_runs, map, Parameters, ... ){
 
    folder.dir <- paste(folder.dir, run.label, sep='/') 
    if(!file.exists(folder.dir)) dir.create(folder.dir)
-   if(printN) printN<-paste0(folder.dir,'/N_final.txt')
+
+
+   output.dir <- paste(folder.dir, 'output', sep='/')
+   if(!file.exists(output.dir)) dir.create(output.dir)
+   if(printN) printN<-paste0(output.dir,'/N_final.txt')
+
   
   # 1. Enter parameters
   if(missing(Parameters)) {Parameters<-enter.parameters()}
@@ -170,7 +175,7 @@ create.landscapes<-function(n_runs, map, Parameters, ... ){
   } # End runs loop
   
   if(saveParameters==1)
-    save(Parameters, file=paste0(folder.dir,'/Parameters.Rdata'))
+    save(Parameters, file=paste0(output.dir,'/Parameters.Rdata'))
     
   return(list(DIR = folder.dir, 
           filenames=paste0(base.name,1:n_runs,'.txt')))

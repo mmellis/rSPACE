@@ -1,14 +1,14 @@
-\name{plot.results}
-\alias{plot.results}
+\name{getResults}
+\alias{getResults}
 
 \title{
-  Plot power curves
+  Plot power curves and return analysis data
 }
 \description{
-Plot power curves for representing each subset in a specified rSPACE folder
+Load data and plot power curves for representing each subset in a specified rSPACE folder. 
 }
 \usage{
-plot.results(folder, CI = 0.95, returnData = T)
+getResults(folder, CI = 0.95, returnData = 1, plot=T)
 }
 
 \arguments{
@@ -16,21 +16,21 @@ plot.results(folder, CI = 0.95, returnData = T)
   Full path for rSPACE folder containing both simulation and analysis output
 }
   \item{CI}{
-  Significance value for two-tailed test
+  Significance value for one-tailed test
 }
   \item{returnData}{
-  Logical: return contents of results file as a dataframe?
+  Option to return contents of results file as a data.frame.   
+}
+  \item{plot}{
+  Option to plot power curves [Logical, default=T]
 }
 }
-\details{
-%%  ~~ If necessary, more details than the description above ~~
-}
+
 \value{
-If returnData is TRUE, return contents of results file as a data.frame.  Otherwise, just creates figure.
+If returnData=0, \code{getResults} returns nothing
+   returnData=1, the complete output for each analyses are returned
+   returnData=2, output of the analyses summarized by sampling intensity is returned.
 }
 \author{
 Martha Ellis
-}
-
-\examples{
 }

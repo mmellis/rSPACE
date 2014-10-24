@@ -285,100 +285,100 @@ void use_surface(double x_wolv[], double y_wolv[], int *N_wolv,
 	delete use;
 }
 }
-///////////////////////////////////////////////////////////////
-// Remove individuals based on a population growth rate
-///////////////////////////////////////////////////////////////
-extern "C" {
-void reduce_pop(int IN[], int N[], double useTotal[], int *pixels, int *snowpoints,
-				double x[], double y[], double snow[], int *n_grps, double *lmda, 
-				double sd_x[], double sd_y[], double trunc_cutoff[], double *snow_cutoff)
-{
-	int snow_ct = 0;
-	int N_wolv =0;
-
-	for(int i = 1; i < *n_grps; i++)
-	{
-		N_wolv = N_wolv + N[i]; 
-	}
-	
-	int n_to_drop=0;
-	n_to_drop = (int)ceil(N_wolv * abs(1 - *lmda)-0.5);
-
-	double *x_wolv = new double[n_to_drop];
-	double *y_wolv = new double[n_to_drop];
-	double *use_tmp = new double[*pixels];
-
-	int *wolv_HRcenters = new int[N_wolv];
-	int *wolv_snowIndex = new int[N_wolv];
-	int *wolv_grp       = new int[N_wolv];
-	
-	int wolv_ct = 0;
-	for(int i = 0; i < *pixels; i++)
-	{
-		if((snow[i] >= *snow_cutoff) && (wolv_ct < N_wolv))
-		{
-			for(int j=0; j < *n_grps; j++)
-			{
-				if(IN[snow_ct + j * *snowpoints] == 1)
-				{
-					wolv_HRcenters[wolv_ct]=i; //index corresponding to x,y
-					wolv_snowIndex[wolv_ct]=snow_ct + j * *snowpoints;//index corresponding to IN
-					wolv_grp[wolv_ct] = j;
-					wolv_ct++;	
-				}
-			}
-			snow_ct++;
-		}
-		use_tmp[i] = snow[i];//Initializes a temporary holder for building use surfaces.
-	}
-
-
-	int *new_order = new int[N_wolv]; 
-	for(int i = 0; i < N_wolv; i++)
-		new_order[i] = i;
-	for(int i = 0; i < N_wolv; i++) //create random permutation of snowpoints.
-	{
-		int c = (int)((double)rand() / ((double)RAND_MAX + 1) * (N_wolv - i));
-		int t = new_order[i]; 
-		new_order[i] = new_order[i+c];
-		new_order[i+c] = t;
-	}
-	
-	for(int j=0; j < *n_grps; j++)
-	{
-		int n_drop = 0;
-		for(int k=0; k < n_to_drop; k++)
-		{
-			if(wolv_grp[new_order[k]]==j)
-			{
-				x_wolv[n_drop] = x[wolv_HRcenters[new_order[k]]];
-				y_wolv[n_drop] = y[wolv_HRcenters[new_order[k]]];
-				IN[wolv_snowIndex[new_order[k]]]=0;
-				n_drop++;
-			}
-		}
-		if(n_drop>0)
-		{
-			use_surface(x_wolv, y_wolv, &n_drop, 
-				x, y, use_tmp, pixels, &sd_x[j], &sd_y[j], &trunc_cutoff[j]); 
-			for(int i=0; i < *pixels; i++)
-			{
-				useTotal[i] = 1 - (1-useTotal[i]) / (1-use_tmp[i]);
-				use_tmp[i] = snow[i];
-			}
-		}
-		N[j] = N[j] - n_drop;
-	}
-
-	delete x_wolv;
-	delete y_wolv;
-	delete use_tmp;
-	delete wolv_HRcenters;
-	delete wolv_snowIndex;
-	delete wolv_grp;
-	delete new_order;
-}
-}
+/////////////////////////////////////////////////////////////////
+//// Remove individuals based on a population growth rate
+/////////////////////////////////////////////////////////////////
+//extern "C" {
+//void reduce_pop(int IN[], int N[], double useTotal[], int *pixels, int *snowpoints,
+//				double x[], double y[], double snow[], int *n_grps, double *lmda, 
+//				double sd_x[], double sd_y[], double trunc_cutoff[], double *snow_cutoff)
+//{
+//	int snow_ct = 0;
+//	int N_wolv =0;
+//
+//	for(int i = 1; i < *n_grps; i++)
+//	{
+//		N_wolv = N_wolv + N[i]; 
+//	}
+//	
+//	int n_to_drop=0;
+//	n_to_drop = (int)ceil(N_wolv * abs(1 - *lmda)-0.5);
+//
+//	double *x_wolv = new double[n_to_drop];
+//	double *y_wolv = new double[n_to_drop];
+//	double *use_tmp = new double[*pixels];
+//
+//	int *wolv_HRcenters = new int[N_wolv];
+//	int *wolv_snowIndex = new int[N_wolv];
+//	int *wolv_grp       = new int[N_wolv];
+//	
+//	int wolv_ct = 0;
+//	for(int i = 0; i < *pixels; i++)
+//	{
+//		if((snow[i] >= *snow_cutoff) && (wolv_ct < N_wolv))
+//		{
+//			for(int j=0; j < *n_grps; j++)
+//			{
+//				if(IN[snow_ct + j * *snowpoints] == 1)
+//				{
+//					wolv_HRcenters[wolv_ct]=i; //index corresponding to x,y
+//					wolv_snowIndex[wolv_ct]=snow_ct + j * *snowpoints;//index corresponding to IN
+//					wolv_grp[wolv_ct] = j;
+//					wolv_ct++;	
+//				}
+//			}
+//			snow_ct++;
+//		}
+//		use_tmp[i] = snow[i];//Initializes a temporary holder for building use surfaces.
+//	}
+//
+//
+//	int *new_order = new int[N_wolv]; 
+//	for(int i = 0; i < N_wolv; i++)
+//		new_order[i] = i;
+//	for(int i = 0; i < N_wolv; i++) //create random permutation of snowpoints.
+//	{
+//		int c = (int)((double)rand() / ((double)RAND_MAX + 1) * (N_wolv - i));
+//		int t = new_order[i]; 
+//		new_order[i] = new_order[i+c];
+//		new_order[i+c] = t;
+//	}
+//	
+//	for(int j=0; j < *n_grps; j++)
+//	{
+//		int n_drop = 0;
+//		for(int k=0; k < n_to_drop; k++)
+//		{
+//			if(wolv_grp[new_order[k]]==j)
+//			{
+//				x_wolv[n_drop] = x[wolv_HRcenters[new_order[k]]];
+//				y_wolv[n_drop] = y[wolv_HRcenters[new_order[k]]];
+//				IN[wolv_snowIndex[new_order[k]]]=0;
+//				n_drop++;
+//			}
+//		}
+//		if(n_drop>0)
+//		{
+//			use_surface(x_wolv, y_wolv, &n_drop, 
+//				x, y, use_tmp, pixels, &sd_x[j], &sd_y[j], &trunc_cutoff[j]); 
+//			for(int i=0; i < *pixels; i++)
+//			{
+//				useTotal[i] = 1 - (1-useTotal[i]) / (1-use_tmp[i]);
+//				use_tmp[i] = snow[i];
+//			}
+//		}
+//		N[j] = N[j] - n_drop;
+//	}
+//
+//	delete x_wolv;
+//	delete y_wolv;
+//	delete use_tmp;
+//	delete wolv_HRcenters;
+//	delete wolv_snowIndex;
+//	delete wolv_grp;
+//	delete new_order;
+//}
+//}
 ///////////////////////////////////////////////////////////////
 // Decide if there were actually detections or not.
 ///////////////////////////////////////////////////////////////

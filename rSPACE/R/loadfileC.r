@@ -110,44 +110,44 @@ make.grid <- function(map, gridsize, cutoff=0, snow_cutoff=NULL, filtered=T){   
 
    
 
-#void reduce_pop(int IN[], int N[], double useTotal[], int *pixels, int *snowpoints,
-#				double x[], double y[], double snow[], int *n_grps, double *lmda,
-#				double sd_x[], double sd_y[])   
-reduce_pop <- function(Wolverines, pts, lmda, howmuch, howfar, trunk, snow_cutoff){      #function for individual calls to C++
-   n = length(getValues(pts))
-   N_wolv = length(Wolverines)
-   n_grps = length(levels(Wolverines$sex))
-   snowpoints = which(getValues(pts) > snow_cutoff)
-
-   IN = rep(0, n_grps*length(snowpoints))
-   b = paste(coordinates(pts)[snowpoints,1],coordinates(pts)[snowpoints,2])
-   for(st in 1:n_grps){
-      use = Wolverines$sex == levels(Wolverines$sex)[st]
-      a = paste(coordinates(Wolverines)[use,1],coordinates(Wolverines)[use,2])
-      IN[which(b %in% a)+(st-1)*length(snowpoints)] = 1  }
-
-   sd_xy<-var_solver(howmuch, howfar, map)
-
-   USE = .C(rd_pop,
-              IN  = as.integer(IN),                       #int IN[]
-              N   = as.integer(table(Wolverines$sex)),    #int N[]
-              use = as.double(getValues(pts)),               #double useTotal[]
-              as.integer(n),                              #int *pixels,
-              as.integer(length(snowpoints)),             #int *snowpoints
-              as.double(coordinates(pts)[,1]),            #double x[]
-              as.double(coordinates(pts)[,2]),            #double y[]
-              as.double(pts$band1),                       #double snow[]
-              as.integer(n_grps),                         # int *n_grps
-              as.double(lmda),                            # double *lmda
-              as.double(c(sd_xy[,1])),                # double sd_x[]
-              as.double(c(sd_xy[,2])),                # double sd_y[]
-              as.double(trunk),                       # double trunc_cutoff[]
-              as.double(snow_cutoff),                 # double *snow_cutoff
-                )
-   return(USE) }
-
+##void reduce_pop(int IN[], int N[], double useTotal[], int *pixels, int *snowpoints,
+##				double x[], double y[], double snow[], int *n_grps, double *lmda,
+##				double sd_x[], double sd_y[])   
+#reduce_pop <- function(Wolverines, pts, lmda, howmuch, howfar, trunk, snow_cutoff){      #function for individual calls to C++
+#   n = length(getValues(pts))
+#   N_wolv = length(Wolverines)
+#   n_grps = length(levels(Wolverines$sex))
+#   snowpoints = which(getValues(pts) > snow_cutoff)
+#
+#   IN = rep(0, n_grps*length(snowpoints))
+#   b = paste(coordinates(pts)[snowpoints,1],coordinates(pts)[snowpoints,2])
+#   for(st in 1:n_grps){
+#      use = Wolverines$sex == levels(Wolverines$sex)[st]
+#      a = paste(coordinates(Wolverines)[use,1],coordinates(Wolverines)[use,2])
+#      IN[which(b %in% a)+(st-1)*length(snowpoints)] = 1  }
+#
+#   sd_xy<-var_solver(howmuch, howfar, map)
+#
+#   USE = .C(rd_pop,
+#              IN  = as.integer(IN),                       #int IN[]
+#              N   = as.integer(table(Wolverines$sex)),    #int N[]
+#              use = as.double(getValues(pts)),               #double useTotal[]
+#              as.integer(n),                              #int *pixels,
+#              as.integer(length(snowpoints)),             #int *snowpoints
+#              as.double(coordinates(pts)[,1]),            #double x[]
+#              as.double(coordinates(pts)[,2]),            #double y[]
+#              as.double(pts$band1),                       #double snow[]
+#              as.integer(n_grps),                         # int *n_grps
+#              as.double(lmda),                            # double *lmda
+#              as.double(c(sd_xy[,1])),                # double sd_x[]
+#              as.double(c(sd_xy[,2])),                # double sd_y[]
+#              as.double(trunk),                       # double trunc_cutoff[]
+#              as.double(snow_cutoff),                 # double *snow_cutoff
+#                )
+#   return(USE) }
+#
 ### R Subfunctions #### 
-second.filter<-function(grid_layer, map1, map2, condition=1, cutoff=1){
+second.filter<-function(grid_layer, map, condition=1, cutoff=1){
    V1<-table(grid_layer[getValues(map)>=condition])[-1]
    tmp<-as.numeric(names(V1)[V1>=cutoff*max(V1)])
    grid_layer[!(grid_layer %in% tmp)]=0

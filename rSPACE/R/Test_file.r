@@ -1,15 +1,32 @@
 ### Main function determining what MARK model is run, etc.       
 wolverine_analysis<-function(n_yrs, ch=NULL, n_visit=NULL, gap_yr=0, FPC=1, ...){
+
 ## Run with ch=NULL to set up output  
-  sim_results<-data.frame(p_est=0, trend=0, trendSE=0, matrix(0,1,n_yrs))
+  sim_results<-data.frame(p_est=0, trend=0, trendSE=0, singular=0, matrix(0,1,n_yrs))
   if(is.null(ch)) return(sim_results)
 
 ## If ch has a value, do the rest of it...
+
+## Subfunctions ################################################################
+  tryN<-function(expr){ tryCatch(expr, error=function(e) return(NULL))}        #
+                                                                               #
+  tryMARK<-function(x) suppressMessages(tryN(x))                               #
+                                                                               #
+  FPC_trendSE<-function(Random.effects.model, k, FPC){                         #
+    trendSE<-Random.effects.model$beta[2,2]                                    #
+    process.variance<-Random.effects.model$sigma^2                             #
+    sampling.variance<-k*trendSE^2 - process.variance                          #
+    trendSE<-sqrt((process.variance+FPC*sampling.variance)/k)                  #
+    return(trendSE)                                                            #
+    }                                                                          #
+################################################################################
+
+
   additional.args<-list(...)
     sample_matrix<-additional.args$sample_matrix
     xxx<-ifelse(is.null(additional.args$xxx),1,additional.args$xxx)
   
-  folder<-get('folder', env=parent.frame())
+  folder<-get('folder', envir=parent.frame())
   MARKfile<-paste0("./mark",LETTERS[xxx])
 
   if(gap_yr == 0){
@@ -24,7 +41,10 @@ wolverine_analysis<-function(n_yrs, ch=NULL, n_visit=NULL, gap_yr=0, FPC=1, ...)
             Epsilon.random.shared=list(formula=~-1+eps:time, share=TRUE)
           model.parameters=list(Epsilon=Epsilon.random.shared,p=p.session)
 
-          RDoccupancy=tryN(mark(test_processed,test_ddl,model.parameters=model.parameters,delete=T,output=F,prefix=MARKfile))
+          RDoccupancy=tryMARK(mark(test_processed,
+                                test_ddl,
+                                model.parameters=model.parameters,
+                                delete=T,output=F,prefix=MARKfile))
                              
           derived_psi <- tryN(RDoccupancy$results$derived[,1])
           derived_psi_vcv <-tryN(RDoccupancy$results$derived.vcv)
@@ -50,7 +70,11 @@ wolverine_analysis<-function(n_yrs, ch=NULL, n_visit=NULL, gap_yr=0, FPC=1, ...)
             Epsilon.gapsampling=list(formula=~-1+gap, share=TRUE)
           model.parameters=list(Epsilon=Epsilon.gapsampling,p=p.session.fixed)
 
-          RDoccupancy=tryN(mark(test_processed,test_ddl,model.parameters=model.parameters,delete=T,output=F,prefix=MARKfile))
+          RDoccupancy=tryMARK(mark(test_processed,
+                                test_ddl,
+                                model.parameters=model.parameters,
+                                delete=T,output=F,prefix=MARKfile))
+                                
           derived_psi <- tryN(RDoccupancy$results$derived[,1])
           derived_psi_vcv <-tryN(RDoccupancy$results$derived.vcv)
           P_est <-tryN(RDoccupancy$results$real$estimate[which(row.names(RDoccupancy$results$real)=="p g1 s1 t1")])
@@ -77,7 +101,10 @@ wolverine_analysis<-function(n_yrs, ch=NULL, n_visit=NULL, gap_yr=0, FPC=1, ...)
             Epsilon.random.shared=list(formula=~-1+eps:time, share=TRUE)
           model.parameters=list(Epsilon=Epsilon.random.shared,p=p.session)
 
-          RDoccupancy=tryN(mark(test_processed,test_ddl,model.parameters=model.parameters,delete=T,output=F,prefix=MARKfile))
+          RDoccupancy=tryMARK(mark(test_processed,
+                                test_ddl,
+                                model.parameters=model.parameters,
+                                delete=T,output=F,prefix=MARKfile))
                              
           derived_psi <- tryN(RDoccupancy$results$derived[,1])
           derived_psi_vcv <-tryN(RDoccupancy$results$derived.vcv)
@@ -94,6 +121,7 @@ wolverine_analysis<-function(n_yrs, ch=NULL, n_visit=NULL, gap_yr=0, FPC=1, ...)
    if(!is.null(derived_psi)){
      sim_results[1,4:(n_yrs+3)] <- matrix(derived_psi,nrow=1)
      sim_results$p_est          <- P_est
+     sim_results$singular       <- tryN(length(RDoccupancy$results$singular))
    }
    
    return(sim_results)

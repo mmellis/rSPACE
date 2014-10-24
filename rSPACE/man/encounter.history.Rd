@@ -8,7 +8,7 @@ Produce a single encounter history file based on population parameters.
   Given an underlying landscape, populates the landscape with simulated individuals based on spacing rules in \code{Parameters}.  Calculates probability of at least one individual at every location on the landscape and accumulates probability over grid cells to determine presence/absence.
 }
 \usage{
-encounter.history(Parameters, map, grid_layer, n.cells)
+encounter.history(Parameters, map, grid_layer, n.cells, printN=0)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -24,6 +24,9 @@ a vector the length of the number of pixels in \code{map} indicating a grid cell
   \item{n.cells}{
 total number of grid cells in sampling frame
 }
+  \item{printN}{
+  Option to output the total number of individuals in each year of the simulation to a text file
+  }
 }
 \details{
   Called through \code{create.landscapes}, but can be used as a standalone function to produce a single encounter history for testing.

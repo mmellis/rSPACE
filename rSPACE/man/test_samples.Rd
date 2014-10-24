@@ -7,7 +7,7 @@
 For a folder containing simulated encounter histories, reads in encounter histories, subsets data if applicable, and runs a function on each encounter history.  Results are accumulated into a data.frame and written into a results output file.
 }
 \usage{
-test_samples(main_wd, folder, Parameters, function_name = "wolverine_analysis", ... )
+test_samples(folder, Parameters, ... )
 }
 \arguments{
   \item{folder}{
@@ -15,10 +15,6 @@ Folder containing encounter history files (full path).
 }
   \item{Parameters}{
 list of parameter values
-}
-  \item{function_name}{
-name of function specifying analysis on 
-each subsetted encounter history
 }
   \item{...}{
 additional arguments
@@ -38,7 +34,7 @@ For \code{Parameters$sample_yrs}, codes will need to match analyses in the funct
 }
 
 \value{
- Stores simulation results based on output specified in the analysis to \code{sim_results.txt}.  The only output to the console is the time used for the function run.
+ Stores simulation results based on output specified in the analysis to \code{sim_results.txt}.  Any messages returned from the analysis function will be displayed on the console.  Returns time used for the function run.
 }
 \author{
 Martha Ellis, Jake Ivan

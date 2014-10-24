@@ -33,7 +33,8 @@ importFrom(raster,
   pointDistance,
   distanceFromPoints)
 importFrom(plyr,
-  ddply)
+  ddply,
+  summarise)
   
   
 export(enter.parameters)
@@ -41,5 +42,5 @@ export(create.landscapes)
 export(test_samples)
 export(wolverine_analysis)
 export(encounter.history)
-export(plot.results)
-export(find.power)
+export(getResults)
+export(findPower)

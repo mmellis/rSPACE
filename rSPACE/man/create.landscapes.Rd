@@ -5,7 +5,7 @@
 Creates a series of files with simulated encounter histories for using in a mark-recapture analysis based on population parameters.
 }
 \usage{
-create.landscapes(n_runs, map, Paramters, ... )
+create.landscapes(n_runs, map, Parameters, ... )
 }
 
 \arguments{
