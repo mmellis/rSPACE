@@ -43,7 +43,7 @@ getResults<-function(folder, CI=0.95, returnData=1, plot=T) {
     dta<-getData(folder, CI) 
     dtaS<-sumData(dta)
     
-    count<-n_runs<-n_grids<-n_visits<-detP<-gap_yr<-NULL
+    count<-n_runs<-n_grid<-n_visits<-detP<-gap_yr<-NULL
           
     if(plot){
       print(ggplot(subset(dtaS, detP<1), 
