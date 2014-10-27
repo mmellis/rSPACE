@@ -8,9 +8,9 @@ Produce a single encounter history file based on population parameters.
   Given an underlying landscape, populates the landscape with simulated individuals based on spacing rules in \code{Parameters}.  Calculates probability of at least one individual at every location on the landscape and accumulates probability over grid cells to determine presence/absence.
 }
 \usage{
-encounter.history(Parameters, map, grid_layer, n.cells, printN=0)
+encounter.history(map, Parameters, ...)
 }
-%- maybe also 'usage' for other objects documented here.
+
 \arguments{
   \item{Parameters}{
 list of parameter values for simulation
@@ -18,21 +18,17 @@ list of parameter values for simulation
   \item{map}{
 a raster layer with underlying habitat information
 }
-  \item{grid_layer}{
-a vector the length of the number of pixels in \code{map} indicating a grid cell index for each pixel 
-}
-  \item{n.cells}{
-total number of grid cells in sampling frame
-}
-  \item{printN}{
-  Option to output the total number of individuals in each year of the simulation to a text file
-  }
+  \item{...}{
+additional options
+ }
 }
 \details{
   Called through \code{create.landscapes}, but can be used as a standalone function to produce a single encounter history for testing.
+  
+  Use \code{showSteps = T} as an additional option to display plots and other output as error checking.
 }
 \value{
-a matrix with \code{n.cells} rows and \code{Parameters$n_yrs*Parameters$n_visits} columns with 1/0 indicating presence/absence of at least one individual in each cell at each visit.
+Vector with one element for each grid cell representing the encounter history at that cell. Encounter histories consist of 1/0 values indicating presence/absence of at least one individual in each cell at each visit in each year of the study period.
 }
 
 \seealso{

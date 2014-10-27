@@ -1,4 +1,4 @@
-### Main function determining what MARK model is run, etc.       
+### Analysis function for each observed encounter history       
 wolverine_analysis<-function(n_yrs, ch=NULL, n_visit=NULL, gap_yr=0, FPC=1, ...){
 
 ## Run with ch=NULL to set up output  
@@ -44,7 +44,7 @@ wolverine_analysis<-function(n_yrs, ch=NULL, n_visit=NULL, gap_yr=0, FPC=1, ...)
           RDoccupancy=tryMARK(mark(test_processed,
                                 test_ddl,
                                 model.parameters=model.parameters,
-                                delete=T,output=F,prefix=MARKfile))
+                                silent=T, delete=T,output=F,prefix=MARKfile))
                              
           derived_psi <- tryN(RDoccupancy$results$derived[,1])
           derived_psi_vcv <-tryN(RDoccupancy$results$derived.vcv)
@@ -73,7 +73,7 @@ wolverine_analysis<-function(n_yrs, ch=NULL, n_visit=NULL, gap_yr=0, FPC=1, ...)
           RDoccupancy=tryMARK(mark(test_processed,
                                 test_ddl,
                                 model.parameters=model.parameters,
-                                delete=T,output=F,prefix=MARKfile))
+                                silent=T, delete=T,output=F,prefix=MARKfile))
                                 
           derived_psi <- tryN(RDoccupancy$results$derived[,1])
           derived_psi_vcv <-tryN(RDoccupancy$results$derived.vcv)
@@ -104,7 +104,7 @@ wolverine_analysis<-function(n_yrs, ch=NULL, n_visit=NULL, gap_yr=0, FPC=1, ...)
           RDoccupancy=tryMARK(mark(test_processed,
                                 test_ddl,
                                 model.parameters=model.parameters,
-                                delete=T,output=F,prefix=MARKfile))
+                                silent=T, delete=T,output=F,prefix=MARKfile))
                              
           derived_psi <- tryN(RDoccupancy$results$derived[,1])
           derived_psi_vcv <-tryN(RDoccupancy$results$derived.vcv)

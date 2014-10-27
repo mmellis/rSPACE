@@ -1,6 +1,33 @@
 ### Functions for creating encounter history files
 default.value<-function(x,val) ifelse(is.null(x),val,x) 
 
+# Create grid_layer
+create.grid<-function(map, Parameters, filter.map=NULL){
+  reNumber=T 
+  if(is.null(filter.map)) {
+      grid_layer<-make.grid(map, gridsize=Parameters$grid_size, 
+                    cutoff=Parameters$sample.cutoff, 
+                    snow_cutoff=Parameters$HRcenter.cutoff)
+    } else {
+      filter.map <- reclassify(filter.map, cbind(NA, 0))
+      filter.map <- extend(filter.map, extent(map), value=0)
+      if(any(is.nan(getValues(filter.map)))) stop('NaNs in filter map')
+  
+      if(all(getValues(filter.map) %in% c(0,1))){
+        grid_layer<-make.grid(map, Parameters$grid_size, filtered=F)
+        grid_layer<-second.filter(grid_layer, map, filter.map)
+      }else{ 
+        grid_layer<-getValues(filter.map) 
+        reNumber=F
+      }
+    }
+    if(reNumber) 
+      grid_layer<-(match(grid_layer,unique(c(0, grid_layer)))-1)
+    
+    return(grid_layer)
+  }
+    
+
 # Add wolverines to simulation
 add.wolv<-function(dN, map, Parameters, wolv.df = NULL){
   if(is.null(Parameters$wghts)) Parameters$wghts=F
@@ -39,9 +66,9 @@ wolv.dataframe<-function(wolv.list, map=NULL){
   
  
 # Create a use surface from a list of wolverine locations 
-build.useLayer<-function(map, wolv, Parameters){
+build.useLayer<-function(map, wolv, Parameters, Example=F){
   useLayer<-1-use_surface(wolv[[1]],Parameters$howmuch[1], Parameters$howfar[1], map, trunk = Parameters$trunk[1])
-  if(length(Parameters$MFratio)>1){
+  if(!Example & length(Parameters$MFratio)>1){
     for(ii in 2:length(Parameters$MFratio)){ 
       useLayer<-useLayer*(1-use_surface(wolv[[ii]],Parameters$howmuch[ii], Parameters$howfar[ii], map, trunk = Parameters$trunk[ii]))}
   }
@@ -50,10 +77,25 @@ build.useLayer<-function(map, wolv, Parameters){
 }  
 
 # Main simulation function...simulate landscape and create encounter history
-encounter.history<-function(Parameters, map, grid_layer, n.cells, printN=0){
+encounter.history<-function(map, Parameters, ...){
+  add.args<-list(...)
+    n_cells<-add.args$n_cells
+    grid_layer<-add.args$grid_layer
+    filter.map<-add.args$filter.map
+    showSteps<-default.value(add.args$showSteps, F)
+    printN<-default.value(add.args$printN, 0)
+
+  n_visits<-Parameters$n_visits
+  n_yrs<-Parameters$n_yrs
   
-  encounter_history<-matrix(0,nrow=n.cells, ncol=Parameters$n_yrs*Parameters$n_visits)
-  ch.rplc<-lapply(seq(1,(Parameters$n_yrs)*Parameters$n_visits, by=Parameters$n_visits), function(x) x:(x+Parameters$n_visits-1)) 
+  lmda<-rep(Parameters$lmda, length.out=(n_yrs-1))
+
+  if(is.null(grid_layer)){
+    grid_layer<-create.grid(map, Parameters, filter.map)
+    n_cells<-length(unique(grid_layer)[unique(grid_layer)>0])
+  }
+
+  encounter_history<-matrix(0, nrow=n_cells, ncol=n_yrs)
 
   # 1. Place individuals
   wolv<-add.wolv(Parameters$N, map, Parameters)
@@ -63,42 +105,91 @@ encounter.history<-function(Parameters, map, grid_layer, n.cells, printN=0){
   useLayer<-build.useLayer(map, wolv, Parameters)
   
   # 3. Calculate probability by grid
-  P.pres<-probPRES(useLayer, grid_layer)
-  P.pres[P.pres<0]=0
+  P.pres<-matrix(0,nrow=n_cells, ncol=n_yrs)
+  P.pres[,1]<-probPRES(useLayer, grid_layer)
+ 
+  # 3b. (Optional) Output plots with first year data
+  if(showSteps){
+    printN<-""  # Cause printN to print to console
+    
+    prev.ask<-devAskNewPage(ask=T)
+    # Habitat map
+    plot(map); title('User supplied habitat map')
+    
+    # Initial locations
+    plot(map)
+      wolv.points<-wolv.dataframe(wolv, map)
+    points(wolv.points$x, wolv.points$y, pch=c(15:18)[wolv.points$sex], col='black')
+    title('Activity center locations - Year 1')
+    rm('wolv.points')
+    
+    # Grid
+    plot(setValues(map, grid_layer), col=c("white", sample(26:137, n_cells, replace=T)))
+    title('Grid (colored for contrast only)')
+    
+    # Individual use layer example
+    ExampleLayer<-build.useLayer(map, list(wolv[[1]][sample(length(wolv[[1]]),1)]), Parameters, Example=T)
+    plot(setValues(map,ExampleLayer))
+    title('Example individual use layer')
+    rm('ExampleLayer')
+    
+    # Full use surface
+    plot(setValues(map,useLayer))
+    title('Probability of at least one individual - Year 1') 
+    
+    # Gridded use
+    plot(setValues(map, c(0,P.pres[,1])[match(grid_layer,unique(c(0, grid_layer)))]))
+    title('Probability of at least one individual by cell - Year 1')
+    
+    prev.ask<-devAskNewPage(ask=prev.ask)
+    rm('prev.ask')
+    
+    cat('\nTotal number of individuals by year\n')
+  } 
  
   # 4. Sample detections in the first year
-  encounter_history[,ch.rplc[[1]]]<-replicate(Parameters$n_visits, rbinom(n=length(P.pres),size=1, prob=P.pres))
- 
-  if(Parameters$n_yrs>1){  # 5. Loop over years to fill in encounter_history
-   for(tt in 2:Parameters$n_yrs){
+  encounter_history[,1]<-sapply(1:n_cells, 
+    function(i) paste(rbinom(n=n_visits, size=1, prob=P.pres[i,1]), collapse=''))
+  
+  # 5. Loop over years to fill in encounter_history
+  if(n_yrs > 1){  
+   for(tt in 2:n_yrs){
       if(printN!=0)
        cat(nrow(wolv.df),' ',sep='',file=printN,append=T)  # Store population sizes by year
+      
       # 6. Calculate population change between t and t+1 
-      if(length(Parameters$lmda)>1) {lmda.tt<-Parameters$lmda[tt-1]} else {lmda.tt<-Parameters$lmda}
-      dN<-lmda.tt*nrow(wolv.df)-nrow(wolv.df)
+      dN<-round(nrow(wolv.df)*(lmda[tt-1] - 1))
         
       # 7. Implement population change  
-       if(round(dN)>0){
-           new.wolv<-add.wolv(round(dN), map, Parameters, wolv.df)
+       if(dN>0){
+           new.wolv<-add.wolv(dN, map, Parameters, wolv.df)
            useLayer<-1-(1-useLayer)*(1-build.useLayer(map, new.wolv, Parameters))
            wolv.df<-rbind(wolv.df, wolv.dataframe(new.wolv))
-       } else if(round(dN)<0) {
-          lost.wolv<-drop.wolv(round(-dN), map, wolv.df, Parameters)
+       } else if(dN<0) {
+          lost.wolv<-drop.wolv(abs(dN), map, wolv.df, Parameters)
           useLayer<-1-(1-useLayer)/(1-build.useLayer(map, lost.wolv[[2]], Parameters))
           wolv.df<-wolv.df[-lost.wolv[[1]],]
        }
     
       # 8. Sample detections and update encounter_history
-      P.pres<-probPRES(useLayer, grid_layer)
-      P.pres[P.pres<0]=0
-      encounter_history[,ch.rplc[[tt]]]<-replicate(Parameters$n_visits, rbinom(n=length(P.pres),size=1, prob=P.pres))
-    
+      P.pres[,tt]<-probPRES(useLayer, grid_layer)
+
+      encounter_history[,tt]<-sapply(1:n_cells, 
+          function(i) paste(rbinom(n=n_visits, size=1, prob=P.pres[i,tt]), collapse=''))
     }} # End year loop (and if statement)
+
 
   if(printN!=0) 
     cat(nrow(wolv.df),'\n',sep='',file=printN,append=T)  # Initial population size
 
-  return(encounter_history)
+  if(showSteps){
+    cat('\nOutputting P.pres and encounter histories by year...\n')
+    encounter_history<-data.frame(round(P.pres,3), encounter_history)
+      names(encounter_history)<-paste(rep(paste0('Yr', 1:n_yrs),2), 
+                                      rep(c('p','ch'),each=n_yrs), sep='.')
+      encounter_history<-encounter_history[,order(rep(1:n_yrs,2))]
+    return(encounter_history)
+  } else return(apply(encounter_history,1,paste, collapse=''))
 }  
 
 # Landscape wrapper
@@ -140,37 +231,23 @@ create.landscapes<-function(n_runs, map, Parameters, ... ){
 
   # 2. Set up map + grid layer
   if(missing(map)) stop("Missing habitat layer")
+  if(!grepl('proj=utm|proj=longlat',proj4string(map))) stop("Projection needs to be in utm or longlat")
   if(grepl('+proj=utm.*',proj4string(map))) 
     if(!grepl('+units=m',proj4string(map))) 
       message('Assuming UTM +units=m')   
   map <- reclassify(map, cbind(c(NA), c(0)))
   if(any(is.nan(getValues(map)))) stop('NaNs in habitat map')
 
-  if(is.null(filter.map)) {
-    grid_layer<-make.grid(map, gridsize=Parameters$grid_size, 
-                  cutoff=Parameters$sample.cutoff, 
-                  snow_cutoff=Parameters$HRcenter.cutoff)
-  } else {
-    filter.map <- reclassify(filter.map, cbind(NA, 0))
-    filter.map <- extend(filter.map, extent(map), value=0)
-    if(any(is.nan(getValues(filter.map)))) stop('NaNs in filter map')
-
-    if(all(getValues(filter.map) %in% c(0,1))){
-      grid_layer<-make.grid(map, Parameters$grid_size, filtered=F)
-      grid_layer<-second.filter(grid_layer, map, filter.map)
-    }else{ grid_layer<-getValues(filter.map) }
-  }
-  
+  grid_layer<-create.grid(map, Parameters, filter.map)
   gridIDs<-unique(grid_layer)[unique(grid_layer)>0]
 
   # 3. Simulate encounter histories loop ##
   for(rn in 1:n_runs){
     cat(rn,'\n');flush.console()
-    encounter_history<-encounter.history(Parameters, map, grid_layer, length(gridIDs), printN)
+    ch<-encounter.history(map, Parameters, grid_layer=grid_layer, n_cells=length(gridIDs), printN=printN)
   
     # 4. Output encounter history
     output_file<-paste(folder.dir,'/',base.name,rn,".txt",sep='')
-    ch<-apply(encounter_history, 1, function(x) paste(x,collapse=""))
     cat(paste("/*", gridIDs, "*/", ch, "1;"), sep="\n",file=output_file) 
   } # End runs loop
   

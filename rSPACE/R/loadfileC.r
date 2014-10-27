@@ -74,9 +74,8 @@ probPRES<-function(surface, gridvec, detP=1){
                   as.integer(max(gridvec)),                             #max_grid
                   occP = as.double(runif(n=(max(gridvec)+1)))          #test values, output detection probabilities
                  )$occP[(unique(gridvec)+1)[-1]]
-  #tmp$use[(unique(gridvec)+1)[-1]]   ##OUTPUT: R index number = grid number (0 = out of grid dropped)
-  #tmp = cbind(unique(gridvec)[-1],USE$use[unique(gridlist[[4]])+1][-1],USE$occP[unique(gridlist[[4]])+1][-1], tmp[unique(gridlist[[4]])+1][-1])
-  #tmp = cbind(USE$use,USE$occP, tmp)
+  USE[USE<0]=0
+  USE[USE>1]=1
   return(USE)
   }
     

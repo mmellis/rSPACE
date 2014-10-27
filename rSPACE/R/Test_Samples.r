@@ -106,7 +106,7 @@ test_samples<-function(folder, Parameters, ... ){
       }
    }
 
-
+  cat('\nSetting up...\n')
   time1 = proc.time()[3] 
   
   n_visits<-Parameters$n_visits
@@ -144,7 +144,7 @@ test_samples<-function(folder, Parameters, ... ){
   if(is.null(n_runs)) n_runs<-length(output_files)
   index<-rep(min_xxx:max_xxx,length.out=n_runs)
   for(rn in (1:n_runs)[index==xxx]){ 
-  
+   cat('\n', rn, ' ');flush.console()
    test<-read.delim(output_files[rn] ,header=F, sep='*', as.is=T)
     GRD<-test$V2
    test<-substr(test[,3],3,(n_visits*n_yrs+2))
@@ -166,6 +166,7 @@ test_samples<-function(folder, Parameters, ... ){
       ch<-drop_visits(ch1, n_visits, n_yrs, n_visit) # drop data from extra visits
 
       for(gap_yr in Parameters$sample_yrs){
+        cat('.'); flush.console()
         sim_results<-RunAnalysis(n_yrs, ch, n_visit, gap_yr, fpc, ...)
         for(i in 1:nrow(sim_results)){
           cat(c(unlist(sim_results[i,]),
