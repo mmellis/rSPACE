@@ -72,7 +72,8 @@ build.useLayer<-function(map, wolv, Parameters, Example=F){
   }
   
   if(!is.null(Parameters$repeat.groups))
-    NotUsed<-NotUsed^2 
+    if(Parameters$repeat.groups==T)
+      NotUsed<-NotUsed^2 
   
   useLayer<-1-NotUsed     
   return(useLayer)
