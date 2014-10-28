@@ -29,8 +29,7 @@ create.grid<-function(map, Parameters, filter.map=NULL){
     
 
 # Add wolverines to simulation
-add.wolv<-function(dN, map, Parameters, wolv.df = NULL){
-  if(is.null(Parameters$wghts)) Parameters$wghts=F
+add.wolv<-function(dN, map, Parameters, wolv.df = NULL){  
   if(is.null(wolv.df)){
    use<-which(getValues(map)>=Parameters$HRcenter.cutoff)
    new.wolv<-lapply(1:length(Parameters$MFratio), function(x) {use[smple(map,use,dN*Parameters$MFratio[x],Parameters$buffer[x],Parameters$wghts)]})
@@ -43,7 +42,6 @@ add.wolv<-function(dN, map, Parameters, wolv.df = NULL){
 
 # Remove wolverines from simulation
 drop.wolv<-function(dN, map, wolv.df, Parameters){
-  if(is.null(Parameters$wghts)) Parameters$wghts=F
   if(Parameters$wghts==T){
     drop.rows<-sample(nrow(wolv.df),dN, prob=getValues(map)[wolv.df$locID])
   } else { drop.rows<-sample(nrow(wolv.df),dN) }
@@ -67,12 +65,16 @@ wolv.dataframe<-function(wolv.list, map=NULL){
  
 # Create a use surface from a list of wolverine locations 
 build.useLayer<-function(map, wolv, Parameters, Example=F){
-  useLayer<-1-use_surface(wolv[[1]],Parameters$howmuch[1], Parameters$howfar[1], map, trunk = Parameters$trunk[1])
+  NotUsed<-1-use_surface(wolv[[1]],Parameters$howmuch[1], Parameters$howfar[1], map, trunk = Parameters$trunk[1])
   if(!Example & length(Parameters$MFratio)>1){
     for(ii in 2:length(Parameters$MFratio)){ 
-      useLayer<-useLayer*(1-use_surface(wolv[[ii]],Parameters$howmuch[ii], Parameters$howfar[ii], map, trunk = Parameters$trunk[ii]))}
+      NotUsed<-NotUsed*(1-use_surface(wolv[[ii]],Parameters$howmuch[ii], Parameters$howfar[ii], map, trunk = Parameters$trunk[ii]))}
   }
-  useLayer<-1-useLayer 
+  
+  if(!is.null(Parameters$repeat.groups))
+    NotUsed<-NotUsed^2 
+  
+  useLayer<-1-NotUsed     
   return(useLayer)
 }  
 
@@ -84,6 +86,11 @@ encounter.history<-function(map, Parameters, ...){
     filter.map<-add.args$filter.map
     showSteps<-default.value(add.args$showSteps, F)
     printN<-default.value(add.args$printN, 0)
+
+  if(is.null(Parameters$detP)) Parameters$detP=1
+  if(is.null(Parameters$trunk)) Parameters$trunk=rep(0,length(Parameters$MFratio))
+  if(is.null(Parameters$wghts)) Parameters$wghts=F
+
 
   n_visits<-Parameters$n_visits
   n_yrs<-Parameters$n_yrs
@@ -228,6 +235,9 @@ create.landscapes<-function(n_runs, map, Parameters, ... ){
   if(missing(Parameters)) {Parameters<-enter.parameters()}
   if(is.null(Parameters$detP)) Parameters$detP=1
   if(is.null(Parameters$trunk)) Parameters$trunk=rep(0,length(Parameters$MFratio))
+  if(is.null(Parameters$wghts)) Parameters$wghts=F
+
+
 
   # 2. Set up map + grid layer
   if(missing(map)) stop("Missing habitat layer")
