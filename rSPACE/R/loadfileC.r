@@ -86,6 +86,7 @@ make.grid <- function(map, gridsize, cutoff=0, snow_cutoff=NULL, filtered=T){   
    n = length(getValues(map))
    x = coordinates(map)[,1]
    y = coordinates(map)[,2]
+   if(cutoff==0) filtered<-F
 
    if(grepl('+proj=longlat',proj4string(map))){
      USE = .C(make_grid,
@@ -146,25 +147,52 @@ make.grid <- function(map, gridsize, cutoff=0, snow_cutoff=NULL, filtered=T){   
 #   return(USE) }
 #
 ### R Subfunctions #### 
-second.filter<-function(grid_layer, map, condition=1, cutoff=1){
-   V1<-table(grid_layer[getValues(map)>=condition])[-1]
-   tmp<-as.numeric(names(V1)[V1>=cutoff*max(V1)])
-   grid_layer[!(grid_layer %in% tmp)]=0
+second.filter<-function(grid_layer, filter.map, cutoff=0.95){
+   V1<-table(grid_layer[getValues(filter.map)==1])[-1]
+   V2<-table(grid_layer)[-1]
+   keep<-as.numeric(names(V1))[V1>=cutoff*V2[match(names(V1),names(V2))]]
+   grid_layer[!(grid_layer %in% keep)]=0
    return(grid_layer)
    }
    
-third.filter<-function(grid_layer, map, sample.area=1.5){
-  small.grid<-make.grid(map, gridsize=sample.area, cutoff=0, filtered=F)
+#third.filter<-function(grid_layer, map, sample.area=1.5){
+#  cutoff<-
+#  small.grid<-make.grid(map, gridsize=sample.area, cutoff=0, filtered=F)  
+#  for(x in unique(grid_layer[grid_layer>0])){
+#    V1<-table(small.grid[grid_layer==x])
+#    V1<-V1[names(V1)!='0']
+#    use<-as.numeric(names(V1))[V1>=max(V1)]
+#    use<-sample(use,1)
+#    grid_layer[grid_layer==x & small.grid!=use]=0
+#    }
+#  return(grid_layer)
+#    }
+
+third.filter<-function(grid_layer, grid_size, sample.area){
+  if(sample.area < grid_size){
   for(x in unique(grid_layer[grid_layer>0])){
-    V1<-table(small.grid[grid_layer==x])
-    V1<-V1[names(V1)!='0']
-    cutoff<-as.numeric(names(which.max(table(V1))))
-    use<-as.numeric(names(V1)[V1>=cutoff])
-    use<-sample(use,1)
-    grid_layer[grid_layer==x & small.grid!=use]=0
-    }
+    IDs<-which(grid_layer==x)
+      big.nr<-min(which(diff(IDs)>1))
+      big.nc<-round(length(IDs)/big.nr) 
+    Cell<-matrix(IDs[1:c(big.nr*big.nc)], nrow=big.nr)
+    
+    keep <- sample.area/grid_size
+      little.nr<- max(c(1,round(keep * big.nr)))
+      little.nc<- max(c(1,round(keep * big.nc)))
+    
+    Start<-sample((big.nr-little.nr)*(big.nc-little.nc),1)
+      start.nr<- Start %% (big.nr-little.nr)
+        start.nr<-ifelse(start.nr==0,big.nr-little.nr,start.nr)
+      start.nc<- (Start-1)%/%(big.nr-little.nr) + 1
+    
+    KeepID<-c(Cell[seq(start.nr, length.out=little.nr), seq(start.nc, length.out=little.nc)])
+    DropIDs<-IDs[!(IDs %in% KeepID)]
+
+    grid_layer[DropIDs]<-0
+    }}
+  
   return(grid_layer)
-    }
+  }
     
 make.grid.utm<-function(map, gridsize){
   map_xy<-dim(map)[2:1] # x = columns, y=rows; values by row

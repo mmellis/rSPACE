@@ -24,10 +24,6 @@ wolverine_analysis<-function(n_yrs, ch=NULL, n_visit=NULL, gap_yr=0, FPC=1, ...)
 
   additional.args<-list(...)
     sample_matrix<-additional.args$sample_matrix
-    xxx<-ifelse(is.null(additional.args$xxx),1,additional.args$xxx)
-  
-  folder<-get('folder', envir=parent.frame())
-  MARKfile<-paste0("./mark",LETTERS[xxx])
 
   if(gap_yr == 0){
           mark_data<-data.frame(ch=ch,freq=rep(1,length(ch)),stringsAsFactors=F)
@@ -44,7 +40,7 @@ wolverine_analysis<-function(n_yrs, ch=NULL, n_visit=NULL, gap_yr=0, FPC=1, ...)
           RDoccupancy=tryMARK(mark(test_processed,
                                 test_ddl,
                                 model.parameters=model.parameters,
-                                silent=T, delete=T,output=F,prefix=MARKfile))
+                                silent=T, delete=T,output=F))
                              
           derived_psi <- tryN(RDoccupancy$results$derived[,1])
           derived_psi_vcv <-tryN(RDoccupancy$results$derived.vcv)
@@ -73,7 +69,7 @@ wolverine_analysis<-function(n_yrs, ch=NULL, n_visit=NULL, gap_yr=0, FPC=1, ...)
           RDoccupancy=tryMARK(mark(test_processed,
                                 test_ddl,
                                 model.parameters=model.parameters,
-                                silent=T, delete=T,output=F,prefix=MARKfile))
+                                silent=T, delete=T,output=F))
                                 
           derived_psi <- tryN(RDoccupancy$results$derived[,1])
           derived_psi_vcv <-tryN(RDoccupancy$results$derived.vcv)
@@ -104,7 +100,7 @@ wolverine_analysis<-function(n_yrs, ch=NULL, n_visit=NULL, gap_yr=0, FPC=1, ...)
           RDoccupancy=tryMARK(mark(test_processed,
                                 test_ddl,
                                 model.parameters=model.parameters,
-                                silent=T, delete=T,output=F,prefix=MARKfile))
+                                silent=T, delete=T,output=F))
                              
           derived_psi <- tryN(RDoccupancy$results$derived[,1])
           derived_psi_vcv <-tryN(RDoccupancy$results$derived.vcv)

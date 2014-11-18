@@ -1,15 +1,23 @@
 ##### Subfunctions #############################################################
+readInput<-function(filename){                                                 #
+  DF<-read.delim(filename, header=F, sep=c(' ', '*'), as.is=T)[,c(2,4)]        #
+  names(DF)<-c('GridID', 'ch')                                                 #
+  return(DF)                                                                   #
+  }                                                                            #
+                                                                               #
 switcheroo<-function(x,detP) {                                                 #
   for(i in 1:length(x)){                                                       #
     if(x[i]=="1"){if(rbinom(1,1,prob=detP)==0) {x[i]="0"}}                     #
     }                                                                          #
     return(x)                                                                  #
   }                                                                            #
+                                                                               #
 time_int<-function(n_visit, n_yrs){                                            #
   tmp<-rep(0,n_visit)                                                          #
   tmp[n_visit] = 1                                                             #
   tmp<-rep(tmp,n_yrs)                                                          #
-  return(tmp[-n_yrs*n_visit])}                                                 #
+  return(tmp[-n_yrs*n_visit])                                                  #
+  }                                                                            #
                                                                                #
 drop_visits<-function(ch, n_visits, n_yrs, n_visit){                           #
   tmp<-rep(F,n_visits)                                                         #
@@ -59,8 +67,8 @@ set_grid<-function(filetest, SubPop=NULL){                                     #
     GRDuse <- unique(getValues(map))                                           #
     GRDuse <- GRDuse[which(GRDuse>0)] #drops NAs and 0s.                       #
   } else {                                                                     #
-    test = read.delim(filetest,header=F, sep='*', as.is=T)                     #
-    GRDuse = test$V2                                                           #
+    test = readInput(filetest)                                                 #
+    GRDuse = test$GridID                                                       #
   }                                                                            #
   return(GRDuse)                                                               #
   }                                                                            #
@@ -145,9 +153,9 @@ test_samples<-function(folder, Parameters, ... ){
   index<-rep(min_xxx:max_xxx,length.out=n_runs)
   for(rn in (1:n_runs)[index==xxx]){ 
    cat('\n', rn, ' ');flush.console()
-   test<-read.delim(output_files[rn] ,header=F, sep='*', as.is=T)
-    GRD<-test$V2
-   test<-substr(test[,3],3,(n_visits*n_yrs+2))
+   test<-readInput(output_files[rn])
+    GRD<-test$GridID
+    test<-test$ch
    use = sample(match(GRDuse, GRD), gridTotal)
 
    detPhold = Parameters$detP
@@ -173,7 +181,7 @@ test_samples<-function(folder, Parameters, ... ){
             n_grid,n_visit,detPhold,gap_yr,file_label(output_files[rn]),'\n'), 
             file=results_file,append=T)
         }}}}}}
-        
+  cat('/n')      
   return(proc.time()[3]-time1)
 }
                 

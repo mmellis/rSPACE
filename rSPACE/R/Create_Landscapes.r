@@ -1,6 +1,18 @@
 ### Functions for creating encounter history files
 default.value<-function(x,val) ifelse(is.null(x),val,x) 
 
+# Check parameters
+check.parameters<-function(Parameters,arg){
+  if(is.null(Parameters$detP)) Parameters$detP=1
+  if(is.null(Parameters$trunk)) Parameters$trunk=rep(0,length(Parameters$MFratio))
+  if(is.null(Parameters$wghts)) Parameters$wghts=T
+  if(is.null(Parameters$filter.cutoff)){
+    if(!is.null(arg$filter.map)){
+     if(all(getValues(arg$filter.map)<=1)){
+        Parameters$filter.cutoff=0.95 }}}  
+  return(Parameters)
+  }
+
 # Create grid_layer
 create.grid<-function(map, Parameters, filter.map=NULL){
   reNumber=T 
@@ -9,18 +21,24 @@ create.grid<-function(map, Parameters, filter.map=NULL){
                     cutoff=Parameters$sample.cutoff, 
                     snow_cutoff=Parameters$HRcenter.cutoff)
     } else {
+      if(any(is.nan(getValues(filter.map)))) stop('NaNs in filter map')    
       filter.map <- reclassify(filter.map, cbind(NA, 0))
-      filter.map <- extend(filter.map, extent(map), value=0)
-      if(any(is.nan(getValues(filter.map)))) stop('NaNs in filter map')
+      #filter.map <- extend(filter.map, extent(map), value=0)
   
       if(all(getValues(filter.map) %in% c(0,1))){
-        grid_layer<-make.grid(map, Parameters$grid_size, filtered=F)
-        grid_layer<-second.filter(grid_layer, map, filter.map)
+        grid_layer<-make.grid(map, gridsize=Parameters$grid_size, 
+                    cutoff=Parameters$sample.cutoff, 
+                    snow_cutoff=Parameters$HRcenter.cutoff)
+        grid_layer<-second.filter(grid_layer, filter.map, cutoff=Parameters$filter.cutoff)
       }else{ 
         grid_layer<-getValues(filter.map) 
         reNumber=F
       }
     }
+    
+    if(!is.null(Parameters$Effective.sample.area))
+        grid_layer<-third.filter(grid_layer, Parameters$grid_size, Parameters$Effective.sample.area)
+    
     if(reNumber) 
       grid_layer<-(match(grid_layer,unique(c(0, grid_layer)))-1)
     
@@ -88,15 +106,15 @@ encounter.history<-function(map, Parameters, ...){
     showSteps<-default.value(add.args$showSteps, F)
     printN<-default.value(add.args$printN, 0)
 
-  if(is.null(Parameters$detP)) Parameters$detP=1
-  if(is.null(Parameters$trunk)) Parameters$trunk=rep(0,length(Parameters$MFratio))
-  if(is.null(Parameters$wghts)) Parameters$wghts=F
-
+  Parameters<-check.parameters(Parameters, add.args)
 
   n_visits<-Parameters$n_visits
   n_yrs<-Parameters$n_yrs
   
   lmda<-rep(Parameters$lmda, length.out=(n_yrs-1))
+
+  if(showSteps == T)
+    cat('\nBuilding landscape...\n'); flush.console()
 
   if(is.null(grid_layer)){
     grid_layer<-create.grid(map, Parameters, filter.map)
@@ -106,6 +124,7 @@ encounter.history<-function(map, Parameters, ...){
   encounter_history<-matrix(0, nrow=n_cells, ncol=n_yrs)
 
   # 1. Place individuals
+  if(Parameters$N <= 0 ) stop('Parameters$N <= 0')
   wolv<-add.wolv(Parameters$N, map, Parameters)
   wolv.df<-wolv.dataframe(wolv)
 
@@ -153,6 +172,7 @@ encounter.history<-function(map, Parameters, ...){
     rm('prev.ask')
     
     cat('\nTotal number of individuals by year\n')
+    flush.console()
   } 
  
   # 4. Sample detections in the first year
@@ -191,6 +211,12 @@ encounter.history<-function(map, Parameters, ...){
     cat(nrow(wolv.df),'\n',sep='',file=printN,append=T)  # Initial population size
 
   if(showSteps){
+    answer<-readline(prompt='\nSave grid to file as raster (y/n)?  ')
+    if(tolower(answer)=='y'){
+      writeRaster(setValues(map, grid_layer), 'ExampleGrid.tif', overwrite=T)
+      cat("  Saved as", paste0(getwd(), '/ExampleGrid.tif'), "\n")
+    }
+      
     cat('\nOutputting P.pres and encounter histories by year...\n')
     encounter_history<-data.frame(round(P.pres,3), encounter_history)
       names(encounter_history)<-paste(rep(paste0('Yr', 1:n_yrs),2), 
@@ -234,11 +260,7 @@ create.landscapes<-function(n_runs, map, Parameters, ... ){
   
   # 1. Enter parameters
   if(missing(Parameters)) {Parameters<-enter.parameters()}
-  if(is.null(Parameters$detP)) Parameters$detP=1
-  if(is.null(Parameters$trunk)) Parameters$trunk=rep(0,length(Parameters$MFratio))
-  if(is.null(Parameters$wghts)) Parameters$wghts=F
-
-
+  Parameters<-check.parameters(Parameters, additional.args)
 
   # 2. Set up map + grid layer
   if(missing(map)) stop("Missing habitat layer")
