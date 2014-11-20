@@ -1,7 +1,8 @@
 ##### Subfunctions #############################################################
 readInput<-function(filename){                                                 #
-  DF<-read.delim(filename, header=F, sep=c(' ', '*'), as.is=T)[,c(2,4)]        #
+  DF<-read.delim(filename, header=F, sep=c(' ', '*'),colClasses=c("character"))#
   names(DF)<-c('GridID', 'ch')                                                 #
+  DF$GridID<-as.numeric(DF$GridID)                                             #
   return(DF)                                                                   #
   }                                                                            #
                                                                                #
