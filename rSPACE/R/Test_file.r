@@ -21,7 +21,7 @@ wolverine_analysis<-function(n_yrs, ch=NULL, n_visit=NULL, gap_yr=0, FPC=1, ...)
     }                                                                          #
 ################################################################################
 
-
+                                                               
   additional.args<-list(...)
     sample_matrix<-additional.args$sample_matrix
 
@@ -32,7 +32,6 @@ wolverine_analysis<-function(n_yrs, ch=NULL, n_visit=NULL, gap_yr=0, FPC=1, ...)
             test_ddl$Epsilon$eps=-1
             test_ddl$Gamma$eps=1
   
-            Psi.t=list(formula=~time)
             p.session=list(formula=~session)
             Epsilon.random.shared=list(formula=~-1+eps:time, share=TRUE)
           model.parameters=list(Epsilon=Epsilon.random.shared,p=p.session)
@@ -92,7 +91,6 @@ wolverine_analysis<-function(n_yrs, ch=NULL, n_visit=NULL, gap_yr=0, FPC=1, ...)
             test_ddl$Epsilon$eps=-1
             test_ddl$Gamma$eps=1
   
-            Psi.t=list(formula=~time)
             p.session=list(formula=~session)
             Epsilon.random.shared=list(formula=~-1+eps:time, share=TRUE)
           model.parameters=list(Epsilon=Epsilon.random.shared,p=p.session)
