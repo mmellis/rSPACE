@@ -18,22 +18,30 @@ getData<-function(folder, CI=0.95){
         get(ls())$lmda 
       })
     
-    CI<-qnorm(CI) 
+
     dta<-read.table(filename[1], header=T)
-    dta$count<-as.numeric(sign(lmda-1)*dta$trend > CI*dta$trendSE) 
+    if("count" %in% names(dta)){
+      message("Using provided values for 'count'.  CI argument ignored")
+    } else if(all(c("trend","trendSE") %in% names(dta))){
+      CI<-qnorm(CI) 
+      dta$count<-as.numeric(sign(lmda-1)*dta$trend > CI*dta$trendSE)
+      } else stop("Either 'count' or 'trend' + 'trendSE' must be provided") 
  return(dta)
 }
 
 
 ## Summing %detected
 sumData<-function(dta){
+  if(!('count' %in% names(dta))) stop("No 'count' variable")
   variables<-c("n_grid","n_visits","detP","gap_yr")
   count <- NULL
+  n_runs<- length(unique(dta$rn))
+  
   dta<-dta[, names(dta) %in% c(variables, 'count')]
   dta<-ddply(dta, names(dta)[!grepl("count",names(dta))], summarise,
     total=sum(!is.na(count)),
-    n_runs=length(count),
     count=sum(count, na.rm=T))
+  dta$n_runs<-n_runs
     
     variables<-variables[!(variables %in% names(dta))]
     if(length(variables)>0)
