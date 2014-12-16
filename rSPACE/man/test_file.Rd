@@ -7,7 +7,7 @@ Default function for analyzing an individual encounter history
   Original function designed for analyzing wolverine encounter histories in Ellis et al. 2013. 
 }
 \usage{
-wolverine_analysis(n_yrs, ch = NULL, n_visit = NULL, gap_yr = 0, FPC = 1, ... )
+wolverine_analysis(n_yrs, ch = NULL, n_visit = NULL, sample_yr = 0, FPC = 1, ... )
 }
 
 \arguments{
@@ -20,7 +20,7 @@ Character vector with encounters
   \item{n_visit}{
 Number of visits per year
 }
-  \item{gap_yr}{
+  \item{sample_yr}{
 Code for possible alternate model formulations
 }
   \item{FPC}{
@@ -42,7 +42,7 @@ data.frame with model results
 Jake Ivan, Martha Ellis
 }
 \note{
-The analysis function you give \code{test_samples} via \code{function_name} will get called in two places in \code{test_samples}.  First, it will get called by \code{RunAnalysis(n_yrs)} to set up a data.frame header.  Then it will get called in each step of the loop over all the encounter history files and subsets using \code{RunAnalysis(n_yrs, ch, n_visit, gap_yr,fpc , ... )}.  This is clunky, but for now, if you want to change \code{wolverine_analysis}, you need to make sure the function you specify will work with those two function calls.
+The analysis function you give \code{test_samples} via \code{function_name} will get called in two places in \code{test_samples}.  First, it will get called by \code{RunAnalysis(n_yrs)} to set up a data.frame header.  Then it will get called in each step of the loop over all the encounter history files and subsets using \code{RunAnalysis(n_yrs, ch, n_visit, sample_yr,fpc , ... )}.  This is clunky, but for now, if you want to change \code{wolverine_analysis}, you need to make sure the function you specify will work with those two function calls.
 }
 
 \references{ELLIS, MARTHA M., JACOB S. IVAN, and MICHAEL K. SCHWARTZ. "Spatially Explicit Power Analyses for Occupancy-Based Monitoring of Wolverine in the US Rocky Mountains." Conservation Biology (2013).}

@@ -94,16 +94,17 @@ file_label<-function(filename){                                                #
 ## Main loop function 
 test_samples<-function(folder, Parameters, ... ){
   additional.args<-list(...)
-    function_name<-default.value(additional.args$function_name,"wolverine_analysis")
+    function_name<-setDefault(additional.args$function_name,"wolverine_analysis")
     SubPop       <-additional.args$SubPop
     sample_matrix<-additional.args$sample_matrix
-    xxx          <-default.value(additional.args$xxx,1)
-    max_xxx      <-default.value(additional.args$max_xxx,1)
-    min_xxx      <-default.value(additional.args$min_xxx,1)
-    base.name    <-default.value(additional.args$base.name, "rSPACEx")
+    xxx          <-setDefault(additional.args$xxx,1)
+    max_xxx      <-setDefault(additional.args$max_xxx,1)
+    min_xxx      <-setDefault(additional.args$min_xxx,1)
+    base.name    <-setDefault(additional.args$base.name, "rSPACEx")
     n_runs       <-additional.args$n_runs
-    FPCind       <-default.value(additional.args$FPC, TRUE)
-    skipConfirm  <-default.value(additional.args$skipConfirm, F)
+    FPCind       <-setDefault(additional.args$FPC, TRUE)
+    skipConfirm  <-setDefault(additional.args$skipConfirm, F)
+    overwrite    <-setDefault(additional.args$overwrite, F)
 
 
    if(!skipConfirm){
@@ -129,11 +130,15 @@ test_samples<-function(folder, Parameters, ... ){
   # Set up output folder/file for results
   folder<-paste0(folder,'/output')
   if(!file.exists(folder)) 
-    dir.create(folder)  
-  results_file<-paste(folder,"/sim_results", xxx, ".txt",sep="")
+    dir.create(folder) 
+       
+  results_file<-paste(folder,"/sim_results.txt",sep="")
+  if(file.exists(results_file) & !overwrite)
+    stop("'sim_results.txt' already exists; use overwrite=TRUE")
+     
   
   sim_results<-RunAnalysis(n_yrs)
-  cat(c(names(sim_results),"n_grid","n_visits","detP","gap_yr","rn","\n"), 
+  cat(c(names(sim_results),"n_grid","n_visits","detP","alt_model","rn","\n"), 
     file=results_file)
   
   
@@ -141,7 +146,7 @@ test_samples<-function(folder, Parameters, ... ){
   if(is.null(Parameters$n_visit_test)) Parameters$n_visit_test=2:Parameters$n_visits
   if(is.null(Parameters$detP_test))    Parameters$detP_test = c(1,0.8,0.2) 
   if(is.null(Parameters$grid_sample))  Parameters$grid_sample=c(0.05,0.15,0.25,0.35,0.45,0.55,0.75,0.95)
-  if(is.null(Parameters$sample_yrs))   Parameters$sample_yrs<-c(0,1)
+  if(is.null(Parameters$alt_model))    Parameters$alt_model<-c(0,1)
   
   GRDuse<-set_grid(output_files[1], SubPop)
   gridTotal<-length(GRDuse)
@@ -175,12 +180,12 @@ test_samples<-function(folder, Parameters, ... ){
       suppressWarnings(rm("ch"))
       ch<-drop_visits(ch1, n_visits, n_yrs, n_visit) # drop data from extra visits
 
-      for(gap_yr in Parameters$sample_yrs){
+      for(altM in Parameters$alt_model){
         cat('.'); flush.console()
-        sim_results<-RunAnalysis(n_yrs, ch, n_visit, gap_yr, fpc, ...)
+        sim_results<-RunAnalysis(n_yrs, ch, n_visit, altM, fpc, ...)
         for(i in 1:nrow(sim_results)){
           cat(c(unlist(sim_results[i,]),
-            n_grid,n_visit,detPhold,gap_yr,file_label(output_files[rn]),'\n'), 
+            n_grid,n_visit,detPhold,altM,file_label(output_files[rn]),'\n'), 
             file=results_file,append=T)
         }}}}}}
   cat('/n')      

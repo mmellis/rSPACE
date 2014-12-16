@@ -20,8 +20,11 @@ importFrom(grid,
   pushViewport,
   grid.layout)
 importFrom(sp,
+  CRS,
+  mapasp,
   coordinates,
-  proj4string)
+  proj4string,
+  "proj4string<-")
 importFrom(raster,
   extend,
   extent,
@@ -31,7 +34,8 @@ importFrom(raster,
   reclassify,
   res,
   pointDistance,
-  distanceFromPoints)
+  distanceFromPoints,
+  writeRaster)
 importFrom(plyr,
   ddply,
   summarise)

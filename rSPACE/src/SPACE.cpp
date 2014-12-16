@@ -148,50 +148,50 @@ extern "C" {void make_grid(double x[], double y[], double *grid_size, int *pixel
 									//Slightly larger than actual value due to rounding issues (not square).
 }
 }
-///////////////////////////////////////////////////////////////
-// Remove parts of grid that aren't in snow areas
-///////////////////////////////////////////////////////////////
-extern "C" {
-void filter_grid(int grid[], double snow[], double *cutoff, int *pixels, double *snow_cutoff)
-{
-	// Find the largest grid value (smaller than *grid_size usually)
-	int maxgrid = 0;
-	for(int i = 0; i < *pixels; i++){
-		if(grid[i] > maxgrid){
-			maxgrid = grid[i];  }}
-
-
-	//initialize n_snow & px
-	int *n_snow = new int[maxgrid + 1]; //keeps track of # pixels with snow in each grid cell
-	int *px = new int[maxgrid + 1];		//keeps track of # pixels in each grid cell
-	for(int i = 0; i <= maxgrid; i++) 
-	{
-		n_snow[i] = 0;
-		px[i] = 0;
-	}
-
-	//Count up the number of pixels in each grid cell and the number of pixels with snow.
-	for(int i = 0; i < *pixels; i++) 
-	{
-		px[grid[i]]++;
-		if(snow[i] >= *snow_cutoff) //EDITED
-			n_snow[grid[i]]++;
-	}
-	
-	// If there is too little snow in the cell, reassign grid value to 0 (= not included).
-	for(int i = 1; i <= maxgrid; i++) 
-	{
-		if(n_snow[i] <= *cutoff * px[i])
-			for(int j = 0; j < *pixels; j++)
-			{
-				if(grid[j] == i)
-					grid[j]=0;
-			}
-	}
-	delete n_snow;
-	delete px;
-}
-}
+/////////////////////////////////////////////////////////////////
+//// Remove parts of grid that aren't in snow areas
+/////////////////////////////////////////////////////////////////
+//extern "C" {
+//void filter_grid(int grid[], double snow[], double *cutoff, int *pixels, double *snow_cutoff)
+//{
+//	// Find the largest grid value (smaller than *grid_size usually)
+//	int maxgrid = 0;
+//	for(int i = 0; i < *pixels; i++){
+//		if(grid[i] > maxgrid){
+//			maxgrid = grid[i];  }}
+//
+//
+//	//initialize n_snow & px
+//	int *n_snow = new int[maxgrid + 1]; //keeps track of # pixels with snow in each grid cell
+//	int *px = new int[maxgrid + 1];		//keeps track of # pixels in each grid cell
+//	for(int i = 0; i <= maxgrid; i++) 
+//	{
+//		n_snow[i] = 0;
+//		px[i] = 0;
+//	}
+//
+//	//Count up the number of pixels in each grid cell and the number of pixels with snow.
+//	for(int i = 0; i < *pixels; i++) 
+//	{
+//		px[grid[i]]++;
+//		if(snow[i] >= *snow_cutoff) //EDITED
+//			n_snow[grid[i]]++;
+//	}
+//	
+//	// If there is too little snow in the cell, reassign grid value to 0 (= not included).
+//	for(int i = 1; i <= maxgrid; i++) 
+//	{
+//		if(n_snow[i] <= *cutoff * px[i])
+//			for(int j = 0; j < *pixels; j++)
+//			{
+//				if(grid[j] == i)
+//					grid[j]=0;
+//			}
+//	}
+//	delete n_snow;
+//	delete px;
+//}
+//}
 ///////////////////////////////////////////////////////////////
 // Sampling part - setting out homeranges on landscape
 ///////////////////////////////////////////////////////////////

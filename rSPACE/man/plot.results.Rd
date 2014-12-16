@@ -27,8 +27,8 @@ getResults(folder, CI = 0.95, returnData = 1, plot=T)
 }
 
 \value{
-If returnData=0, \code{getResults} returns nothing
-   returnData=1, the complete output for each analyses are returned
+If returnData=0, \code{getResults} returns nothing \cr
+   returnData=1, the complete output for each analyses are returned \cr
    returnData=2, output of the analyses summarized by sampling intensity is returned.
 }
 \author{

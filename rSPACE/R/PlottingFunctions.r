@@ -33,7 +33,7 @@ getData<-function(folder, CI=0.95){
 ## Summing %detected
 sumData<-function(dta){
   if(!('count' %in% names(dta))) stop("No 'count' variable")
-  variables<-c("n_grid","n_visits","detP","gap_yr")
+  variables<-c("n_grid","n_visits","detP","alt_model")
   count <- NULL
   n_runs<- length(unique(dta$rn))
   
@@ -55,11 +55,11 @@ getResults<-function(folder, CI=0.95, returnData=1, plot=T) {
     dta<-getData(folder, CI) 
     dtaS<-sumData(dta)
     
-    count<-n_runs<-n_grid<-n_visits<-detP<-gap_yr<-NULL
+    count<-n_runs<-n_grid<-n_visits<-detP<-alt_model<-NULL
           
     if(plot){
       print(ggplot(subset(dtaS, detP<1), 
-          aes(x=n_grid, y=(count/n_runs), group=interaction(n_visits,detP,gap_yr)))+
+          aes(x=n_grid, y=(count/n_runs), group=interaction(n_visits,detP,alt_model)))+
         geom_line(aes(colour=n_visits, linetype=factor(detP)),size=1.25)+
         scale_colour_gradient(name = "# visits",guide="legend") +
         scale_linetype_discrete(name=expression(p["sim"]))+
@@ -67,7 +67,7 @@ getResults<-function(folder, CI=0.95, returnData=1, plot=T) {
         labs(x="Number of cells sampled", 
              y="Detected trend/Number of runs", 
              title=basename(folder))+
-        facet_wrap(~gap_yr) )
+        facet_wrap(~alt_model) )
     }
      
     if(returnData==1) return(dta)
