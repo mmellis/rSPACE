@@ -41,7 +41,7 @@ makeGrid<-function(map, gridsize){
    isUTM     <- grepl('+proj=utm', proj4string(map))
 
    if(isLongLat){
-     use <- .C(make_grid,
+     use <- .C('make_grid',
                     as.double(x),                     #Longitude
                     as.double(y),                     #Latitude
                     as.double(gridsize),              #Desired grid size (100km2)

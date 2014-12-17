@@ -2,16 +2,16 @@
 \alias{rSPACE-package}
 \alias{rSPACE}
 \docType{package}
-\title{Spatially-explicit Power Analysis for Conservation and Ecology}
+\title{Spatially-Explicit Power Analysis for Conservation and Ecology}
 \description{
-This package provides subroutines necessary to run a simple, spatially-explicit population simulation and then conduct a power analysis for detecting population trends through occupancy-based modeling.
+Conducts a spatially-explicit, simulation-based power analysis for detecting trends in population abundance through occupancy-based modeling. Applicable for evaluating monitoring designs in conservation and ecological settings.
 }
 \details{
 \tabular{ll}{
 Package: \tab rSPACE\cr
 Type: \tab Package\cr
 Version: \tab 1.0\cr
-Date: \tab 2013-10-15\cr
+Date: \tab 2014-12-15\cr
 License: \tab GPL (>=2)\cr
 }
 

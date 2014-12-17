@@ -17,7 +17,7 @@ placeIndividuals <- function(map, use, N, buffer, wght=F){
    use10 <- rep(0, n)
     use10[smp[1]] <- isLongLat
 
-   USE = .C(sampling_fxn,
+   USE = .C('sample_ind',
                   as.double(x),               #Longitude
                   as.double(y),               #Latitude
                   as.integer(N),              #Desired number of wolverines to place

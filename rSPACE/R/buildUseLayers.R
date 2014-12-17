@@ -33,7 +33,7 @@ use_surface<-function(Wolv, howmuch, howfar, map, trunk = trunk){
     stop('Invalid value for trunction')
   trunk<-ifelse(trunk==1, 0, qnorm((1 + trunk) / 2))
 
-  USE = .C(use_fxn,
+  USE = .C('use_surface',
               as.double(coordinates(map)[Wolv,1]),   #x_wolv
               as.double(coordinates(map)[Wolv,2]),   #y_wolv
               as.integer(length(Wolv)),              #N_wolv

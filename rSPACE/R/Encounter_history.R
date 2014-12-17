@@ -1,7 +1,7 @@
 # Accumulate probability by grid id ---------------------------------
 probPRES<-function(surface, gridvec, detP=1){
   #tmp = as.double(runif(n=(max(gridvec)+1)))
-  USE = .C(calc_prob,
+  USE = .C('calc_prob',
                   as.double(surface),                                   #use  =  use surface with prob of at least one wolverine
                   as.integer(gridvec),                                  #grid = vector of grid indices
                   use = as.integer(rep(0,max(gridvec)+1)),              #detection
