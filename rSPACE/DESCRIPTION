@@ -1,7 +1,7 @@
 Package: rSPACE
 Type: Package
 Title: Spatially-Explicit Power Analysis for Conservation and Ecology
-Version: 1.0.2
+Version: 1.0.3
 Date: 2014-12-15
 Author: Martha Ellis, Jake Ivan, Jody Tucker, Mike Schwartz
 Maintainer: Martha Ellis <martha.ellis@gmail.com>

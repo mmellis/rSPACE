@@ -158,7 +158,7 @@ encounter.history <- function(map, Parameters, ...){
            useLayer <- 1-(1-useLayer)*(1-build.useLayer(map, new.wolv, Parameters))
            wolv.df <- rbind(wolv.df, wolv.dataframe(new.wolv))
        } else if(dN<0) {
-          lost.wolv <- dropN(abs(dN), map, wolv.df, Parameters)
+          lost.wolv <- dropN(abs(dN), map, Parameters, wolv.df)
           useLayer <- 1-(1-useLayer)/(1-build.useLayer(map, lost.wolv[[2]], Parameters))
           wolv.df <- wolv.df[-lost.wolv[[1]],]
        }
