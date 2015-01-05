@@ -37,12 +37,7 @@ create.landscapes<-function(n_runs, map, Parameters, ... ){
 
   # 2. Set up map + grid layer
   if(missing(map)) stop("Missing habitat layer")
-  if(!grepl('proj=utm|proj=longlat',proj4string(map))) stop("Projection needs to be in utm or longlat")
-  if(grepl('+proj=utm.*',proj4string(map))) 
-    if(!grepl('+units=m',proj4string(map))) 
-      message('Assuming UTM +units=m')   
-  map <- reclassify(map, cbind(c(NA), c(0)))
-  if(any(is.nan(getValues(map)))) stop('NaNs in habitat map')
+  map<-checkMap(map)
 
   grid_layer<-createGrid(map, Parameters, filter.map)
   gridIDs<-unique(grid_layer)[unique(grid_layer)>0]

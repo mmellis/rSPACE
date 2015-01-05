@@ -1,5 +1,20 @@
-# Check parameter list for missing values, update names, etc
+# Check map for NAs, NaNs, etc
+checkMap<-function(map){
+  if(!grepl('proj=utm|proj=longlat',proj4string(map))) stop("Projection needs to be in utm or longlat")
 
+  if(grepl('+proj=utm.*',proj4string(map)))
+    if(!grepl('+units=m',proj4string(map)))
+      message('Assuming UTM +units=m')
+
+  map <- reclassify(map, cbind(c(NA), c(0)))
+
+  if(any(is.nan(getValues(map)))) stop('NaNs in habitat map')
+
+  return(map)
+}
+
+
+# Check parameter list for missing values, update names, etc
 checkParameters<-function(pList,argList){
 
   if(is.null(pList$detP))
