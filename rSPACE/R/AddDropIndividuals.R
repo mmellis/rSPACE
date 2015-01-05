@@ -87,7 +87,7 @@ wolv.dataframe<-function(wolv.list, map=NULL){
   nTypes <- length(wolv.list)
   nPerType <- sapply(wolv.list, length)
 
-  wolv.df<-data.frame(type  = rep(1:nTypes, each=nPerType),
+  wolv.df<-data.frame(type  = rep(1:nTypes, nPerType),
                       locID = unlist(wolv.list))
   if(!is.null(map)){
     xy<-coordinates(map)[wolv.df$locID, ]

@@ -188,7 +188,7 @@ test_samples<-function(folder, Parameters, ... ){
             n_grid,n_visit,detPhold,altM,file_label(output_files[rn]),'\n'), 
             file=results_file,append=T)
         }}}}}}
-  cat('/n')      
+  cat('\n')
   return(proc.time()[3]-time1)
 }
                 

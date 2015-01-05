@@ -1,10 +1,12 @@
 Package: rSPACE
 Type: Package
 Title: Spatially-Explicit Power Analysis for Conservation and Ecology
-Version: 1.0.3
+Version: 1.0.4
 Date: 2014-12-15
 Author: Martha Ellis, Jake Ivan, Jody Tucker, Mike Schwartz
 Maintainer: Martha Ellis <martha.ellis@gmail.com>
 Description: Conducts a spatially-explicit, simulation-based power analysis for detecting trends in population abundance through occupancy-based modeling. Applicable for evaluating monitoring designs in conservation and ecological settings.
 License: GPL (>=2)
 Imports: raster, RMark, ggplot2, tcltk2, sp, grid, plyr, tcltk
+URL: http://github.com/mmellis/rSPACE
+BugReports: http://github.com/mmellis/rSPACE/issues
