@@ -6,7 +6,7 @@ checkMap<-function(map){
     if(!grepl('+units=m',proj4string(map)))
       message('Assuming UTM +units=m')
 
-  map <- reclassify(map, cbind(c(NA), c(0)))
+  if(any(is.na(getValues(map)))) stop('NAs in habitat map. Replace with 0s')
 
   if(any(is.nan(getValues(map)))) stop('NaNs in habitat map')
 

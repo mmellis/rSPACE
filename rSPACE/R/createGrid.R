@@ -8,7 +8,8 @@ createGrid<-function(map, pList, filter.map=NULL){
     if(any(is.nan(getValues(filter.map))))
       stop('NaNs in filter map')
 
-    filter.map <- reclassify(filter.map, cbind(NA, 0))
+    if(any(is.na(getValues(filter.map))))
+      stop('NAs in filter map. Replace with 0s')
 
     if(all(getValues(filter.map) %in% c(0,1))){
       gridLayer <- makeGrid(map, gridsize=pList$grid_size)
@@ -74,29 +75,39 @@ makeGrid<-function(map, gridsize){
 
 # 1st filter: meet minimum habitat threshold --------------------
 filterByHabitat<-function(gridLayer, map, sample.cutoff, habitat.cutoff){  
-  habitatOK <- getValues(map) >= habitat.cutoff  
-  V1 <- table(gridLayer[habitatOK])[-1]
-  V2 <- table(gridLayer)[-1]
-  matchV1<-match(names(V1), names(V2)) 
+  if(sample.cutoff == 0 ) return(gridLayer)
+
+  habitatOK <- getValues(map) >= habitat.cutoff
+
+  IDs <- sort(unique(gridLayer))
+  if(IDs[1] == 0)
+    IDs <- IDs[-1]
+   
+  V1 <- tabulate(gridLayer[habitatOK], nbins=max(IDs))[IDs]
+  V2 <- tabulate(gridLayer, nbins=max(IDs))[IDs]
   
-  keep    <- (V1 >= sample.cutoff * V2[matchV1])
-  keepIds <- as.numeric(names(V1))[keep]
+  keep    <- IDs[V1 >= sample.cutoff * V2]
   
-  gridLayer[!(gridLayer %in% keepIds)] <- 0
+  gridLayer[!(gridLayer %in% keep)] <- 0
   return(gridLayer)
 }
 
 # 2nd filter: apply filter map ----------------------------------
 filterByMap<-function(gridLayer, filter.map, cutoff=0.95){
+   if(cutoff == 0) return(gridLayer)
+
    mapOK <- getValues(filter.map)==1
-   V1 <- table(gridLayer[mapOK])[-1]
-   V2 <- table(gridLayer)[-1]
-   matchV1 <- match(names(V1),names(V2))
 
-   keep    <- (V1 >= cutoff*V2[matchV1])
-   keepIds <- as.numeric(names(V1))[keep]
+   Cells<-sort(unique(gridLayer))
+   if(Cells[1] == 0)
+    Cells<-Cells[-1]
 
-   gridLayer[!(gridLayer %in% keepIds)] <- 0
+   V1 <- tabulate(gridLayer[mapOK], nbins=max(Cells))[Cells]
+   V2 <- tabulate(gridLayer, nbins=max(Cells))[Cells]
+
+   keep    <- Cells[V1 >= cutoff*V2]
+
+   gridLayer[!(gridLayer %in% keep)] <- 0
    return(gridLayer)
 }
 
