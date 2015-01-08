@@ -1,5 +1,5 @@
 # Check map for NAs, NaNs, etc
-checkMap<-function(map){
+checkMap<-function(map, filter.map){
   if(!grepl('proj=utm|proj=longlat',proj4string(map))) stop("Projection needs to be in utm or longlat")
 
   if(grepl('+proj=utm.*',proj4string(map)))
@@ -9,6 +9,19 @@ checkMap<-function(map){
   if(any(is.na(getValues(map)))) stop('NAs in habitat map. Replace with 0s')
 
   if(any(is.nan(getValues(map)))) stop('NaNs in habitat map')
+
+  if(!is.null(filter.map)){
+    if(proj4string(filter.map) != proj4string(map))
+      stop('map and filter.map must have the same projection')
+    if(any(is.nan(getValues(filter.map))))
+      stop('NaNs in filter.map')
+    if(any(is.na(getValues(map))))
+      stop('NAs in filter.map. Replace with 0s')
+    if(extent(filter.map)!=extent(map))
+      stop('map and filter.map must have the same extent')
+    if(any(res(filter.map)!=res(map)))
+      stop('map and filter.map must have the same resolution')
+    }
 
   return(map)
 }

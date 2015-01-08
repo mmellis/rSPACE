@@ -37,7 +37,7 @@ create.landscapes<-function(n_runs, map, Parameters, ... ){
 
   # 2. Set up map + grid layer
   if(missing(map)) stop("Missing habitat layer")
-  map<-checkMap(map)
+  map<-checkMap(map, filter.map)
 
   grid_layer<-createGrid(map, Parameters, filter.map)
   gridIDs<-unique(grid_layer)[unique(grid_layer)>0]

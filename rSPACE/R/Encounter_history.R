@@ -37,7 +37,7 @@ encounter.history <- function(map, Parameters, ...){
     cat('\nBuilding landscape...\n'); flush.console()
 
   if(is.null(grid_layer)){
-    map <- checkMap(map)
+    map <- checkMap(map, filter.map)
     grid_layer <- createGrid(map, Parameters, filter.map)
     n_cells <- length(unique(grid_layer)[unique(grid_layer) > 0])
   }
