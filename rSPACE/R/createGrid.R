@@ -20,6 +20,9 @@ createGrid<-function(map, pList, filter.map=NULL){
     }
   }
 
+  if(length(unique(gridLayer))==1)
+    stop('No grid cells in layer. Check filtering steps')
+
   if(!is.null(pList$Effective.sample.area))
       gridLayer<-reduceArea(gridLayer, pList$grid_size, pList$Effective.sample.area)
 
