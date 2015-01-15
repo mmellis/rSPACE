@@ -42,6 +42,7 @@ Optional argument \code{printN} defaults to TRUE.  Logical - prints population s
 
 Optional argument \code{saveParameters} defaults to TRUE.  Logical - save rData file with parameter list used in run scenario.
 
+Optional argument \code{saveGrid} defaults to TRUE.  Logical - save raster layer with sampling grid used in run scenario.
  
 }
 \value{
