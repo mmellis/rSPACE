@@ -113,6 +113,9 @@ filterByMap<-function(gridLayer, filter.map, cutoff=0.95){
 
 # 3rd filter: reduce effective sampling area --------------------
 reduceArea<-function(gridLayer, grid_size, sample.area){
+  if(sample.area > grid_size)
+    stop('Effective sample area is larger than grid_size')
+
   if(sample.area < grid_size){
     for(x in unique(gridLayer[gridLayer>0])){
       IDs<-which(gridLayer==x)
@@ -120,7 +123,7 @@ reduceArea<-function(gridLayer, grid_size, sample.area){
         big.nc<-round(length(IDs)/big.nr)
       Cell<-matrix(IDs[1:c(big.nr*big.nc)], nrow=big.nr)
 
-      keep <- sample.area/grid_size
+      keep <- sqrt(sample.area/grid_size)
         little.nr<- max(c(1,round(keep * big.nr)))
         little.nc<- max(c(1,round(keep * big.nc)))
 
