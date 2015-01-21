@@ -1,10 +1,16 @@
 ### Subfunctions for analyzing output files with SPACE ###
 ########## Subfunctions ################
 getData<-function(folder, CI=0.95){
-    filename<-dir(folder, pattern='sim_results.*txt', recursive=T, full.names=T)
+    if(grepl('txt$', folder)){
+      filename <- folder
+      folder   <- dirname(folder)
+    } else {
+      filename<-dir(folder, pattern='sim_results.*txt', recursive=T, full.names=T)
       filename<-filename[!grepl('NOTUSE', filename)]
+    }
+
     key <- dir(folder, pattern='Parameters.Rdata', recursive=T, full.names=T)
-    if(length(filename)==0) stop("Can't find the file")
+    if(length(filename)==0) stop("Can't find results file")
     if(length(key)==0) stop("Can't find the parameters key")
     
     
@@ -65,7 +71,7 @@ getResults<-function(folder, CI=0.95, returnData=1, plot=T) {
         scale_linetype_discrete(name=expression(p["sim"]))+
         scale_y_continuous(limits=c(0,1))+
         labs(x="Number of cells sampled", 
-             y="Detected trend/Number of runs", 
+             y="Detected trend/Number of replicates",
              title=basename(folder))+
         facet_wrap(~alt_model) )
     }
