@@ -120,7 +120,7 @@ wolverine_analysis<-function(n_yrs, ch=NULL, n_visit=NULL, sample_yr=0, FPC=1, .
      sim_results$trendSE        <- FPC_trendSE(Random.effects.model, k=nrow(Trend_DM), FPC)
    }
    if(!is.null(derived_psi)){
-     sim_results[1,4:(n_yrs+3)] <- matrix(derived_psi,nrow=1)
+     sim_results[1,grep('X',names(sim_results))] <- matrix(derived_psi,nrow=1)
      sim_results$p_est          <- P_est
      sim_results$singular       <- tryN(length(RDoccupancy$results$singular))
    }
