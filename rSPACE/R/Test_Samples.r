@@ -44,15 +44,6 @@ drop_detP <-function(ch, detP) {                                               #
                                                                                #
 FPC <- function(n, N, use=T) {if(use==T) return((N-n)/N) else return(1)}       #
                                                                                #
-                                                                               #
-variance.components<-function(est, Trend_DM, vcv.est, REML=T){                 #
-   if(REML==T) {                                                               #
-     return(var.components.reml(est,design=Trend_DM,vcv.est))                  #
-     } else {                                                                  #
-     return(var.components(est,design=Trend_DM,vcv.est))                       #
-     }                                                                         #
-}                                                                              #
-                                                                               # 
 set_grid<-function(filetest, SubPop=NULL){                                     #
  # Filter out cells that shouldn't be included.                                #
  # SubPop should be a raster with the previous grid layer                      #
