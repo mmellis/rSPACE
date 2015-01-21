@@ -10,7 +10,11 @@ wolverine_analysis<-function(n_yrs, ch=NULL, n_visit=NULL, sample_yr=0, FPC=1, .
 ## Subfunctions ################################################################
   tryN<-function(expr) tryCatch(expr, error=function(e) return(NULL))          #
   tryW<-function(expr) suppressWarnings(tryN(expr))                            #
-  tryM<-function(expr) suppressMessages(tryN(expr))                            #
+  tryM<-function(expr) suppressMessages(tryCatch(expr,                         #
+          error=function(e){                                                   #
+            if(grepl("mark.exe", e$message)){                                  #
+              stop(e$message, call.=F)                                         #
+            } else return(NULL)}))                                             #
                                                                                #
   time_int<-function(n_visit, n_yrs){                                          #
     tmp<-rep(0,n_visit)                                                        #
