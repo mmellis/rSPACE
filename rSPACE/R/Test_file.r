@@ -12,6 +12,13 @@ wolverine_analysis<-function(n_yrs, ch=NULL, n_visit=NULL, sample_yr=0, FPC=1, .
   tryW<-function(expr) suppressWarnings(tryN(expr))                            #
   tryM<-function(expr) suppressMessages(tryN(expr))                            #
                                                                                #
+  time_int<-function(n_visit, n_yrs){                                          #
+    tmp<-rep(0,n_visit)                                                        #
+    tmp[n_visit] = 1                                                           #
+    tmp<-rep(tmp,n_yrs)                                                        #
+    return(tmp[-n_yrs*n_visit])                                                #
+    }                                                                          #
+                                                                               #
   FPC_trendSE<-function(Random.effects.model, k, FPC){                         #
     trendSE<-Random.effects.model$beta[2,2]                                    #
     process.variance<-Random.effects.model$sigma^2                             #

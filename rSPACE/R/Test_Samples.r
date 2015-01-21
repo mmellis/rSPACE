@@ -12,14 +12,7 @@ switcheroo<-function(x,detP) {                                                 #
     if(x[i]=="1"){if(rbinom(1,1,prob=detP)==0) {x[i]="0"}}                     #
     }                                                                          #
     return(x)                                                                  #
-  }                                                                            #
-                                                                               #
-time_int<-function(n_visit, n_yrs){                                            #
-  tmp<-rep(0,n_visit)                                                          #
-  tmp[n_visit] = 1                                                             #
-  tmp<-rep(tmp,n_yrs)                                                          #
-  return(tmp[-n_yrs*n_visit])                                                  #
-  }                                                                            #
+  }                                                                            #                                                                          #
                                                                                #
 drop_visits<-function(ch, n_visits, n_yrs, n_visit){                           #
   tmp<-rep(F,n_visits)                                                         #
@@ -101,6 +94,7 @@ test_samples<-function(folder, Parameters, ... ){
     max_xxx      <-setDefault(additional.args$max_xxx,1)
     min_xxx      <-setDefault(additional.args$min_xxx,1)
     base.name    <-setDefault(additional.args$base.name, "rSPACEx")
+    results.file <-setDefault(additional.args$results.file, "sim_results.txt")
     n_runs       <-additional.args$n_runs
     FPCind       <-setDefault(additional.args$FPC, TRUE)
     skipConfirm  <-setDefault(additional.args$skipConfirm, F)
@@ -132,9 +126,9 @@ test_samples<-function(folder, Parameters, ... ){
   if(!file.exists(folder)) 
     dir.create(folder) 
        
-  results_file<-paste(folder,"/sim_results.txt",sep="")
+  results_file<-paste(folder,results.file,sep="/")
   if(file.exists(results_file) & !overwrite)
-    stop("'sim_results.txt' already exists; use overwrite=TRUE")
+    stop(paste0("'",results.file,"' already exists; use overwrite=TRUE"))
      
   
   sim_results<-RunAnalysis(n_yrs)
