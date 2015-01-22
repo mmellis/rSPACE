@@ -19,7 +19,7 @@ findPower(folder, data, CI = 0.95, pwr = 0.8, n_grid=NULL)
  Dataframe with previously loaded results
  }
   \item{CI}{
-  Significance level
+  Significance level (one-tailed test)
 } 
   \item{pwr}{
   If specified, desired power
