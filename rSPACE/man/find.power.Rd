@@ -13,7 +13,7 @@ findPower(folder, data, CI = 0.95, pwr = 0.8, n_grid=NULL)
 
 \arguments{
   \item{folder}{
- Full path for rSPACE folder containing both simulation and analysis output
+ rSPACE folder containing both simulation and analysis output for a scenario
 }
   \item{data}{
  Dataframe with previously loaded results
@@ -29,7 +29,9 @@ findPower(folder, data, CI = 0.95, pwr = 0.8, n_grid=NULL)
 }
 }
 \details{
-Data must be provided either by specifying a folder within which to look for a results file or providing previously loaded results.
+Data must be provided either by specifying a folder within which to look for a results file (sim_results.txt) and parameter list (Parameters.rdata) or by providing previously loaded results.
+
+If multiple results files are found in \code{folder} only the first will be used by default.  To specify a specific results file, the full path for the results file can be used for \code{folder}.
 
 Depending on whether \code{pwr} or \code{n_grid} are specified, \code{findPower} will return the opposite.  If both \code{pwr} and \code{n_grid}, \code{n_grid} will be ignored
 }
