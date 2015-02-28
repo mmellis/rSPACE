@@ -1,11 +1,12 @@
-\name{create.landscapes}
+\name{createReplicates}
 \alias{create.landscapes}
+\alias{createReplicates}
 \title{Wrapper function to create replicate simulated landscapes}
 \description{
-Creates a series of files with replicated, complete encounter histories based on habitat and population parameters.
+Creates a series of files with replicated complete encounter histories based on habitat and population parameters.
 }
 \usage{
-create.landscapes(n_runs, map, Parameters, ... )
+createReplicates(n_runs, map, Parameters, ... )
 }
 
 \arguments{
@@ -24,9 +25,9 @@ optional options (see details)
 }
 }
 \details{
-This function will produce \code{n_run} text files with simulated encounter histories.  Each individual file does not contain identifying information about the parameters used to create it, so it will be good practice to create a folder structure to keep separate simulations separate.  Default is to create a folder for the runs (./rSPACE_X) and name all encounter histories ./rSPACE_X/rSPACEx??.txt where ?? indicates the run number.  If \code{Parameters} is not specified, \code{\link{enter.parameters}} will be called.
+This function will produce \code{n_run} text files with simulated complete encounter histories.  Each individual file does not contain identifying information about the parameters used to create it, so it will be good practice to create a folder structure to keep separate simulations separate.  Default is to create a folder for the runs (./rSPACE_X) and name all encounter histories ./rSPACE_X/rSPACEx??.txt where ?? indicates the run number.  If \code{Parameters} is not specified, \code{\link{enter.parameters}} will be called.
 
-\code{map} defines the landscape for the population simulation.  Values of \code{map} are used as weights for both selecting individual activity centers and scaling bivariate normal movement distributions.  
+\code{map} raster layer defining the landscape for the population simulation.  Values of \code{map} are used as weights for both selecting individual activity centers and scaling bivariate normal movement distributions.  Raster layer should use either longlat or utm projections with meter units.
 
 There are additional arguments that can be included to specify other options, but some are more sketchy than others. 
 

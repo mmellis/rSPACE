@@ -18,8 +18,7 @@ if(is.null(Parameters)){
     grid_size       = 100,                      
     habitat.cutoff = 1,                  
     sample.cutoff   = 0.5,
-    n_visits        = 6,                      
-    detP            = 1
+    n_visits        = 6
     ) }                
 
 
@@ -134,8 +133,7 @@ if(doneVal==1){
          grid_size=as.numeric(tclvalue(grid.val)),
          habitat.cutoff=as.numeric(tclvalue(HRcutoff.val)),
          sample.cutoff=as.numeric(tclvalue(gridcut.val)),
-         n_visits=as.numeric(tclvalue(visit.val)),
-         detP=1)
+         n_visits=as.numeric(tclvalue(visit.val)))
          
   n.grps<-as.numeric(tclvalue(grps.val))
   check.values(Parameters,n.grps)

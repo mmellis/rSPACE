@@ -57,7 +57,7 @@ wolverine_analysis<-function(n_yrs, ch=NULL, n_visit=NULL, sample_yr=0, FPC=1, .
           P_est <-tryN(RDoccupancy$results$real$estimate[which(row.names(RDoccupancy$results$real)=="p g1 s1 t1")])
    
           Trend_DM=cbind(1,1:n_yrs)
-          Random.effects.model<-tryW(var.components.reml(est=derived_psi,design=Trend_DM,vcv.est=derived_psi_vcv))
+          Random.effects.model<-tryW(var.components.reml(theta=derived_psi,design=Trend_DM,vcv=derived_psi_vcv))
                 
   } else if(sample_yr == 1) {    #runs gap year analysis
 
@@ -92,7 +92,7 @@ wolverine_analysis<-function(n_yrs, ch=NULL, n_visit=NULL, sample_yr=0, FPC=1, .
           }
           
           Trend_DM = cbind(1,seq(1,n_yrs-1,by=2))
-          Random.effects.model<-tryW(var.components.reml(est=new_derived_psi,design=Trend_DM,vcv.est=new_derived_psi_vcv))
+          Random.effects.model<-tryW(var.components.reml(theta=new_derived_psi,design=Trend_DM,vcv=new_derived_psi_vcv))
 
   } else if(sample_yr == 2) {    #runs skip year analysis
           ch<-drop_years(ch, n_visit, samples=sample_matrix)
@@ -116,7 +116,7 @@ wolverine_analysis<-function(n_yrs, ch=NULL, n_visit=NULL, sample_yr=0, FPC=1, .
           P_est <-tryN(RDoccupancy$results$real$estimate[which(row.names(RDoccupancy$results$real)=="p g1 s1 t1")])
    
           Trend_DM=cbind(1,1:n_yrs)
-          Random.effects.model<-tryW(var.components.reml(est=derived_psi,design=Trend_DM,vcv.est=derived_psi_vcv))
+          Random.effects.model<-tryW(var.components.reml(theta=derived_psi,design=Trend_DM,vcv=derived_psi_vcv))
    }
    
    if(!is.null(Random.effects.model)){

@@ -84,18 +84,20 @@ encounter.history <- function(map, Parameters, ...){
 
     # Grid
     random.colors <- function(n) sample(colors()[!grepl('white|gr.y|black', colors())],n, replace=T)
-    ggplot(data=data.frame(coordinates(map)[,1:2], z=factor(grid_layer, levels=0:n_cells)),
+    print(ggplot(data=data.frame(coordinates(map)[,1:2], z=factor(grid_layer, levels=0:n_cells)),
       aes(x=x, y=y, fill=z))+geom_raster()+
       scale_fill_manual(values=c("white",random.colors(n_cells)),guide=F)+
       scale_x_continuous(expand=c(0,0))+
       scale_y_continuous(expand=c(0,0))+
       coord_fixed(ratio=aspRatio)+
-      labs(title='Grid (colored for contrast only)')
+      labs(title='Grid (colored for contrast only)'))
 
     # Initial locations
-    print(P1+geom_point(data=wolv.dataframe(wolv, map), aes(shape=factor(type)))+
+    print(P1+geom_point(data=wolv.dataframe(wolv, map), 
+      aes(shape=factor(type), colour=factor(type)))+
+      scale_colour_hue(l=30)+
         labs(fill='Habitat suitability',
-             shape='Type',
+             shape='Type',colour='Type',
              title='Individual activity center locations - Year 1'))
 
 

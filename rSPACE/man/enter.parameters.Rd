@@ -36,6 +36,8 @@ Minimum habitat value \tab Cutoff value for where individual centers should be l
 Minimum sampling value \tab Cutoff for home much habitat must be included in cell to sample\cr
 Number of visits \tab Maximum number of visits to each grid cell per year\cr
 }
+
+For parameters defining movement distribution, estimates may be drawn from either movement studies (e.g., step lengths), home range studies (e.g., minimum convex polygon, kernal estimates), or expert opinion.  These parameter estimates should reflect expected movement during the sampling season only.  For some species (e.g., a wide-ranging species such as wolverine), an individual may be reasonably expected to potentially visit any location in its home range during the sampling season; however, this is not always expected to be the case.
 }
 \value{
 A parameter list with the following items
@@ -52,9 +54,9 @@ Population growth rate
 }
 \item{buffer}{Distance between individual movement centers for each type of individual
 }
-\item{moveDist}{Percent of time within movement radius for each type of individual
+\item{moveDist}{Movement radius for each type of individual
 }
-\item{moveDistQ}{Movement radius for each type of individual
+\item{moveDistQ}{Percent of time within movement radius for each type of individual
 }
 \item{maxDistQ}{Proportion of movement distribution to allow
 }

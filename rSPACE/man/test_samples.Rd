@@ -1,13 +1,14 @@
-\name{test_samples}
+\name{testReplicates}
+\alias{testReplicates}
 \alias{test_samples}
 \title{
-  Analyze a set of encounter histories
+  Analyze a set of replicate encounter histories
 }
 \description{
-For a folder containing simulated encounter histories: reads in complete encounter histories, subsets data if applicable, and runs an analysis function on each subsetted encounter history.  Results are accumulated into a data.frame and written into a results output file.
+For a folder containing simulated encounter histories: reads in complete replicated encounter histories, subsets data if applicable, and runs an analysis function on each subsetted encounter history.  Results are accumulated into a data.frame and written into a results output file.
 }
 \usage{
-test_samples(folder, Parameters, ... )
+testReplicates(folder, Parameters, ... )
 }
 \arguments{
   \item{folder}{
@@ -21,7 +22,7 @@ additional arguments
 }
 }
 \details{   
-The main role of \code{test_samples} is to read in complete encounter histories, subset them based on varying sampling effort, and then run an analysis on each "observed" encounter history (e.g. subsetted file).  The actual analysis that gets applied will be determined by the function specified with optional argument, \code{function_name}.  The default function, \code{\link{wolverine_analysis}}, includes code from the original analysis used in Ellis et al. (2013).
+The main role of \code{testReplicates} is to read in complete encounter histories, subset them based on varying sampling effort, and then run an analysis on each "observed" encounter history (e.g. subsetted file).  The actual analysis that gets applied will be determined by the function specified with optional argument, \code{function_name}.  The default function, \code{\link{wolverine_analysis}}, includes code from the original analysis used in Ellis et al. (2013).
 
 Options for subsetting the encounter histories can be specified via \code{Parameters}.   The number of visits per year to test can be specified by \code{Parameters$n_visit_test}, the proprotion of the grid included in the sample \code{Parameters$grid_sample}, the detection probability per visit \code{Parameters$detP_test}, and the sampling scheme by year \code{Parameters$alt_model}.  If these objects are not in the \code{Parameters} list, the default values are:
 \itemize{
@@ -44,7 +45,22 @@ Optional argument \code{FPC} indicates whether to use a finite population correc
 
 \value{
  Stores simulation results based on output specified in the analysis to \code{sim_results.txt}.  Returns time used for the function run.
+ 
+ By default, variables outputted to \code{sim_results.txt} include:
+\itemize{
+\item \code{p_est} Detection probability estimated from occupancy model                           
+\item \code{trend} Trend parameter estimate from GLM using occupancy ests and vcv
+\item \code{trendSE} Standard error of trend parameter                                  
+\item \code{singular} Number of singularities from estimated occupancy model
+\item \code{X1}-\code{X10} Occupancy estimates by year of simulation
+\item \code{n_grid} Number of cells used for observed encounter history (subset)
+\item \code{n_visits} Number of sampling occasions for subset
+\item \code{detP} Per visit detection probability for subset
+\item \code{alt_model} Alternative model specification for subset
+\item \code{rn} Base name for original complete encounter history file used for subset
 }
+}
+
 \author{
 Martha Ellis, Jake Ivan
 }

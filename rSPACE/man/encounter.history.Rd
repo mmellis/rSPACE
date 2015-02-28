@@ -22,14 +22,16 @@ additional options
  }
 }
 \details{
-  Main simulation function called through \code{create.landscapes} to produce replicate, complete encounter history files. 
+  Main simulation function called through \code{createReplicates} to produce replicate complete encounter history files. 
   
   Use \code{showSteps = T} as an additional option to display plots, save sampling grid, and other output as error checking.
 }
 \value{
 Vector with one element for each grid cell representing the encounter history at that cell. Encounter histories consist of 1/0 values indicating presence/absence of at least one individual in each cell at each visit in each year of the study period.
+
+If \code{showSteps = T}, output will consist of a data.frame with 2 x n_yrs columns.  For each cell in each year, both an encounter history for the year (1/0s representing used/unused during sampling occasions) and the probability of use in the cell will be included. 
 }
 
 \seealso{
-  \code{\link{create.landscapes}}
+  \code{\link{createReplicates}}
 }

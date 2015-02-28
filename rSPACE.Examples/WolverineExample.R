@@ -16,7 +16,6 @@ getwd()
 
 
 ## 3.) Load habitat layer  
-  #data(WolverineHabitat) ### This doesn't work anymore?! Stupid! Awful!
   WolverineHabitat<-raster::raster(system.file('external/WolvHabitat_Bitterroot.tif', package='rSPACE'))
 
 
@@ -46,7 +45,7 @@ getwd()
   #    subsets to test).
   BaseParameters<-c(BaseParameters,
     list(
-      n_visit_test=c(3:6),                # Number of sampling occasions per year
+      n_visit_test=c(3:6),                  # Number of sampling occasions per year
       detP_test   =c(0.8),                  # Per visit detection probability (if spp present)
       grid_sample =c(0.05,0.15,0.25,0.35,   # Percent of grid to sample
                     0.45,0.55,0.75,0.95),
@@ -67,15 +66,15 @@ Example1<-encounter.history(map=WolverineHabitat, Parameters=BaseParameters, sho
       Plist_Scenario1$lmda <- 0.933
   
   #- 6b.) Create simulated encounter history replicates 
-    create.landscapes(n_runs=10, map=WolverineHabitat, Parameters=Plist_Scenario1,
+    createReplicates(n_runs=10, map=WolverineHabitat, Parameters=Plist_Scenario1,
                     run.label='rSPACE.Scenario1')
-         # Note: 100 runs will take a long time to run both create.landscapes and test_samples.
+         # Note: 100 replicates will take a long time to run for both createReplicates and testReplicates.
          #        Reducing the number of runs is good for examples and testing 
          #        because it will run more quickly but will cause figures to 
          #        jump around more.
                     
   #- 6c.) Analyze subsetted encounter history replicates
-    test_samples('./rSPACE.Scenario1', Parameters=Plist_Scenario1, skipConfirm=T)
+    testReplicates('./rSPACE.Scenario1', Parameters=Plist_Scenario1)
    
   #- 6d.) Check out the results!
     #-- Power curves    
@@ -94,10 +93,10 @@ Example1<-encounter.history(map=WolverineHabitat, Parameters=BaseParameters, sho
     Plist_Scenario2$N    <- 25
     Plist_Scenario2$lmda <- 0.933
     
-  create.landscapes(n_runs=100, map=WolverineHabitat, Parameters=Plist_Scenario2,
+  createReplicates(n_runs=100, map=WolverineHabitat, Parameters=Plist_Scenario2,
                     run.label='rSPACE.Scenario2', skipConfirm=T) 
                                        
-  test_samples('./rSPACE.Scenario2', Parameters=Plist_Scenario2, skipConfirm=T)
+  testReplicates('./rSPACE.Scenario2', Parameters=Plist_Scenario2, skipConfirm=T)
   
   
   ## Scenario 3: N = 50, lmda = 1.041
@@ -105,10 +104,10 @@ Example1<-encounter.history(map=WolverineHabitat, Parameters=BaseParameters, sho
     Plist_Scenario3$N    <- 50
     Plist_Scenario3$lmda <- 1.041
   
-  create.landscapes(n_runs=100, map=WolverineHabitat, Parameters=Plist_Scenario3,
+  createReplicates(n_runs=100, map=WolverineHabitat, Parameters=Plist_Scenario3,
                     run.label='rSPACE.Scenario3', skipConfirm=T)
                     
-  test_samples('./rSPACE.Scenario3', Parameters=Plist_Scenario3, skipConfirm=T)
+  testReplicates('./rSPACE.Scenario3', Parameters=Plist_Scenario3, skipConfirm=T)
   
   
   ## Scenario 4: N = 25, lmda = 1.041
@@ -116,15 +115,17 @@ Example1<-encounter.history(map=WolverineHabitat, Parameters=BaseParameters, sho
     Plist_Scenario4$N    <- 25
     Plist_Scenario4$lmda <- 1.041
    
-  create.landscapes(n_runs=100, map=WolverineHabitat, Parameters=Plist_Scenario4,
+  createReplicates(n_runs=100, map=WolverineHabitat, Parameters=Plist_Scenario4,
                     run.label='rSPACE.Scenario4', skipConfirm=T)  
                      
-  test_samples('./rSPACE.Scenario4', Parameters=Plist_Scenario4, skipConfirm=T)   
+  testReplicates('./rSPACE.Scenario4', Parameters=Plist_Scenario4, skipConfirm=T)   
  
 
 
                     
 ## 7.) Combine results to create a fancy figure
+  require(ggplot2)
+  require(plyr)
 
   #-- Set up folder locations and parameters  
   ResultsList<-list()
@@ -162,6 +163,6 @@ Example1<-encounter.history(map=WolverineHabitat, Parameters=BaseParameters, sho
           scale_linetype_discrete(name=expression(p["sim"]))+
           scale_y_continuous(limits=c(0,1))+
           labs(x="Number of cells sampled", 
-               y="Detected trend/Number of runs")+
+               y="Detected trend/Number of replicates")+
           facet_grid(N~lmda, labeller=facet_labels) 
                    

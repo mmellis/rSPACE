@@ -137,7 +137,7 @@ test_samples<-function(folder, Parameters, ... ){
   gridTotal<-length(GRDuse)
     
   n_grid_sample = round(Parameters$grid_sample*gridTotal)
-  detP_test = adjust_detP(Parameters$detP_test,Parameters$detP)
+  detP_test = adjust_detP(Parameters$detP_test)
 
   
   #Main loop
@@ -150,7 +150,7 @@ test_samples<-function(folder, Parameters, ... ){
     test<-test$ch
    use = sample(match(GRDuse, GRD), gridTotal)
 
-   detPhold = Parameters$detP
+   detPhold = 1
   
   for(detPt in detP_test){
   test<-drop_detP(test, detPt)  # cumulatively reduces the number of detections
@@ -177,4 +177,4 @@ test_samples<-function(folder, Parameters, ... ){
   return(proc.time()[3]-time1)
 }
                 
-  
+testReplicates<-test_samples  

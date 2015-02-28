@@ -56,8 +56,9 @@ create.landscapes<-function(n_runs, map, Parameters, ... ){
   if(saveParameters)
     save(Parameters, file=paste0(output.dir,'/Parameters.Rdata'))
   if(saveGrid)
-    writeRaster(setValues(map, grid_layer), file=paste0(output.dir,'/Grid.tif'), overwrite=T)
+    writeRaster(setValues(map, grid_layer), filename=paste0(output.dir,'/Grid.tif'), overwrite=T)
     
   return(list(DIR = folder.dir, 
           filenames=paste0(base.name,1:n_runs,'.txt')))
 } # End function
+createReplicates<-create.landscapes
