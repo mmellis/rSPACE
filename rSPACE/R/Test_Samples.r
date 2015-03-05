@@ -159,6 +159,7 @@ test_samples<-function(folder, Parameters, ... ){
   for(n_grid in n_grid_sample){
     suppressWarnings(rm("ch1"))
     ch1<-test[use[1:n_grid]]    # only include data from grids in sample
+    grd1<-GRD[use[1:n_grid]]
     fpc<-ifelse(FPCind, FPC(n_grid, gridTotal) ,1)  
 
     for(n_visit in Parameters$n_visit_test){
@@ -167,7 +168,7 @@ test_samples<-function(folder, Parameters, ... ){
 
       for(altM in Parameters$alt_model){
         cat('.'); flush.console()
-        sim_results<-RunAnalysis(n_yrs, ch, n_visit, altM, fpc, ...)
+        sim_results<-RunAnalysis(n_yrs, ch, n_visit, altM, fpc, grdId=grd1, ...)
         for(i in 1:nrow(sim_results)){
           cat(c(unlist(sim_results[i,]),
             n_grid,n_visit,detPhold,altM,file_label(output_files[rn]),'\n'), 
