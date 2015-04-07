@@ -43,7 +43,9 @@ importFrom(plyr,
   
 export(enter.parameters)
 export(create.landscapes)
+export(createReplicates)
 export(test_samples)
+export(testReplicates)
 export(wolverine_analysis)
 export(encounter.history)
 export(getResults)
