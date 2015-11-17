@@ -61,6 +61,7 @@ set_grid<-function(filetest, SubPop=NULL){                                     #
                                                                                #
 adjust_detP<-function(detP_test,detP1=1){                                      #
   n<-length(detP_test)                                                         #
+  detP_test<-sort(detP_test, decreasing=T)                                     #
   detP_test<-detP_test/c(detP1,detP_test)[-(n+1)]                              #
   return(detP_test)                                                            #
   }                                                                            #
