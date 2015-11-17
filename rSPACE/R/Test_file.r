@@ -52,8 +52,8 @@ wolverine_analysis<-function(n_yrs, ch=NULL, n_visit=NULL, sample_yr=0, FPC=1, .
                                 model.parameters=model.parameters,
                                 silent=T, delete=T,output=F))
                              
-          derived_psi <- tryN(RDoccupancy$results$derived[,1])
-          derived_psi_vcv <-tryN(RDoccupancy$results$derived.vcv)
+          derived_psi <- tryN(RDoccupancy$results$derived[[1]][,1])
+          derived_psi_vcv <-tryN(RDoccupancy$results$derived.vcv[[1]])
           P_est <-tryN(RDoccupancy$results$real$estimate[which(row.names(RDoccupancy$results$real)=="p g1 s1 t1")])
    
           Trend_DM=cbind(1,1:n_yrs)
@@ -81,8 +81,8 @@ wolverine_analysis<-function(n_yrs, ch=NULL, n_visit=NULL, sample_yr=0, FPC=1, .
                                 model.parameters=model.parameters,
                                 silent=T, delete=T,output=F))
                                 
-          derived_psi <- tryN(RDoccupancy$results$derived[,1])
-          derived_psi_vcv <-tryN(RDoccupancy$results$derived.vcv)
+          derived_psi <- tryN(RDoccupancy$results$derived[[1]][,1])
+          derived_psi_vcv <-tryN(RDoccupancy$results$derived.vcv[[1]])
           P_est <-tryN(RDoccupancy$results$real$estimate[which(row.names(RDoccupancy$results$real)=="p g1 s1 t1")])
           
           if(!is.null(RDoccupancy)){
@@ -95,6 +95,8 @@ wolverine_analysis<-function(n_yrs, ch=NULL, n_visit=NULL, sample_yr=0, FPC=1, .
           Random.effects.model<-tryW(var.components.reml(theta=new_derived_psi,design=Trend_DM,vcv=new_derived_psi_vcv))
 
   } else if(sample_yr == 2) {    #runs skip year analysis
+          if(is.null(sample_matrix))
+            stop('Argument "sample_matrix" is missing, with no default')
           ch<-drop_years(ch, n_visit, samples=sample_matrix)
           mark_data<-data.frame(ch=ch,freq=rep(1,length(ch)),stringsAsFactors=F)
           test_processed=process.data(mark_data,model="RDOccupEG",time.intervals=time_int(n_visit,n_yrs))
@@ -111,8 +113,8 @@ wolverine_analysis<-function(n_yrs, ch=NULL, n_visit=NULL, sample_yr=0, FPC=1, .
                                 model.parameters=model.parameters,
                                 silent=T, delete=T,output=F))
                              
-          derived_psi <- tryN(RDoccupancy$results$derived[,1])
-          derived_psi_vcv <-tryN(RDoccupancy$results$derived.vcv)
+          derived_psi <- tryN(RDoccupancy$results$derived[[1]][,1])
+          derived_psi_vcv <-tryN(RDoccupancy$results$derived.vcv[[1]])
           P_est <-tryN(RDoccupancy$results$real$estimate[which(row.names(RDoccupancy$results$real)=="p g1 s1 t1")])
    
           Trend_DM=cbind(1,1:n_yrs)
