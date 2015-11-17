@@ -76,7 +76,7 @@ file_label<-function(filename){                                                #
 ################################################################################
 
 ## Main loop function 
-test_samples<-function(folder, Parameters, ... ){
+testReplicates<-function(folder, Parameters, ... ){
   additional.args<-list(...)
     function_name<-setDefault(additional.args$function_name,"wolverine_analysis")
     SubPop       <-additional.args$SubPop
@@ -178,4 +178,7 @@ test_samples<-function(folder, Parameters, ... ){
   return(proc.time()[3]-time1)
 }
                 
-testReplicates<-test_samples  
+test_samples<-function(...){
+  .Deprecated("testReplicates")
+  return(0)
+  }  

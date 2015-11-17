@@ -1,6 +1,6 @@
 ### Functions for creating encounter history files
 # Landscape wrapper
-create.landscapes<-function(n_runs, map, Parameters, ... ){
+createReplicates<-function(n_runs, map, Parameters, ... ){
   # 0. Match argument list 
   additional.args<-list(...)
     folder.dir<-setDefault(additional.args$folder.dir, getwd())    
@@ -85,4 +85,7 @@ create.landscapes<-function(n_runs, map, Parameters, ... ){
   return(list(DIR = folder.dir, 
           filenames=paste0(base.name,(1:n_runs)+rn.start,'.txt')))
 } # End function
-createReplicates<-create.landscapes
+create.landscapes<-function(...){
+  .Deprecated("createReplicates")
+  return(0)
+  }
