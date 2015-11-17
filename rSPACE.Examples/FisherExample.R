@@ -48,8 +48,8 @@ library(ggplot2)
   Example2<-encounter.history(map=Habitat, Parameters=TestParameters, filter.map=SampleFrame, showSteps=T)
 
 # Create replicate landscapes
-  create.landscapes(n_runs=100, map=Habitat, Parameters=BaseParameters, filter.map=SampleFrame, run.label='Base')
-  create.landscapes(n_runs=100, map=Habitat, Parameters=TestParameters, filter.map=SampleFrame, run.label='Test')
+  createReplicates(n_runs=100, map=Habitat, Parameters=BaseParameters, filter.map=SampleFrame, run.label='Base')
+  createReplicates(n_runs=100, map=Habitat, Parameters=TestParameters, filter.map=SampleFrame, run.label='Test')
 
  
  
@@ -70,8 +70,8 @@ library(ggplot2)
 
  data(IrregularYrs) # Possible set of irregular sampling histories over time  ##!!!!!
  
- test_samples('./Base', Parameters=c(BaseParameters,SubsettingParameters), sample_matrix=IrregularYrs, skipConfirm=T)
- test_samples('./Test', Parameters=c(TestParameters,SubsettingParameters), sample_matrix=IrregularYrs, skipConfirm=T)
+ testReplicates('./Base', Parameters=c(BaseParameters,SubsettingParameters), sample_matrix=IrregularYrs, skipConfirm=T)
+ testReplicates('./Test', Parameters=c(TestParameters,SubsettingParameters), sample_matrix=IrregularYrs, skipConfirm=T)
 
 
 
