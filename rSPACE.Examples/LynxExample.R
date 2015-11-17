@@ -29,18 +29,18 @@ getwd()
     grid_size       = 75,                 # Cell size in grid
     MFratio         = c(0.6, 0.4),        # Ratio of types of individuals
     buffer          = 2*c(4.9, 5.7),      # Distance between individual center locations
-    howfar          = c(4.9, 5.7),        # Movement radius
-    howmuch         = c(0.95, 0.95),      # Proportion of time in radius
-    trunk           = c(  2, 2),          # Truncate movements above 1 SD
-    HRcenter.cutoff = 0.5,                # Minimum habitat value required for individual center locations
-    sample.cutoff   = 0.75                # Proportion of pixels above minimum habitat value to include cell
-    )
+    moveDist        = c(4.9, 5.7),        # Movement radius
+    moveDistQ       = c(0.95, 0.95),      # Proportion of time in radius
+    maxDistQ        = c(0.95, 0.95),      # Truncate movements above 1 SD
+    habitat.cutoff  = 0.5,                # Minimum habitat value required for individual center locations
+    sample.cutoff   = 0.75)               # Proportion of pixels above minimum habitat value to include cell
+    
 
 # Check steps for building encounter histories
   Example<-encounter.history(map=Habitat, Parameters=BaseParameters, showSteps=T)
-
+                                                        
 # Create replicate landscapes
-  create.landscapes(n_runs=100, map=Habitat, Parameters=BaseParameters, run.label='BaseScenario')
+  createReplicates(n_runs=100, map=Habitat, Parameters=BaseParameters, run.label='BaseScenario')
 
 #### Analyze landscapes
 
@@ -98,7 +98,7 @@ lynx_analysis<-function(n_yrs, ch=NULL, n_visit, M, FPC, ...){                  
     )                                       #  0 = continuous sampling only
 
 
- test_samples('./BaseScenario', Parameters=c(BaseParameters,SubsettingParameters), 
+ testReplicates('./BaseScenario', Parameters=c(BaseParameters,SubsettingParameters), 
                 function_name="lynx_analysis", TrueModel=1)   
                 #TrueModel is an argument specific to lynx_analysis()
 
