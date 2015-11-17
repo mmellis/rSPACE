@@ -162,6 +162,7 @@ encounter.history <- function(map, Parameters, ...){
        } else if(dN<0) {
           lost.wolv <- dropN(abs(dN), map, Parameters, wolv.df)
           useLayer <- 1-(1-useLayer)/(1-build.useLayer(map, lost.wolv[[2]], Parameters))
+          useLayer[is.na(useLayer)]<-0
           wolv.df <- wolv.df[-lost.wolv[[1]],]
        }
 
