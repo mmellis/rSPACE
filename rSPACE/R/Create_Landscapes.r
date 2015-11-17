@@ -30,7 +30,12 @@ createReplicates<-function(n_runs, map, Parameters, ... ){
 
    output.dir <- paste(folder.dir, 'output', sep='/')
    if(!file.exists(output.dir)) dir.create(output.dir)
-   if(printN) printN<-paste0(output.dir,'/N_final.txt')
+   if(printN){
+     printN<-paste0(output.dir,'/N_final.txt')
+     if(add==F){
+      message(paste('Restarting', printN))
+      file.remove(printN)
+     }}
 
    prevPList<-paste0(output.dir,'/Parameters.rdata'))
   
