@@ -39,7 +39,11 @@ importFrom(raster,
 importFrom(plyr,
   ddply,
   summarise)
-  
+ importFrom("grDevices", "colors", "devAskNewPage", "grey",
+             "heat.colors")
+  importFrom("methods", "as", "slot")
+  importFrom("stats", "loess", "predict", "qnorm", "rbinom", "runif")
+  importFrom("utils", "flush.console", "read.delim", "read.table")  
   
 export(enter.parameters)
 export(create.landscapes)

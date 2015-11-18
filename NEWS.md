@@ -20,3 +20,23 @@ rSPACE 1.0.0
 * Fixed ratio for creating effective sampling areas
 * Error message added for trying to set effective sampling area larger than grid size
 
+##### rSPACE 1.1.0 (27 Feb 2015)
+###### Changes
+* Cleaning up and adding example scripts
+* Updating documentation
+###### Bug fixes
+* Cleaning up clicky box errors, and setting default detP=1
+* Bugs for printing figures in showSteps=T in encounter.history()
+* Saving grid from encounter.history() with showSteps=T
+
+##### rSPACE 1.2.0 (17 Nov 2015)
+###### Changes
+* Deprecating create.landscapes() and test_samples()
+* Allow passing cell IDs to analysis function
+* Updating check procedure for previous Parameters file.
+* Now produces error if trying to overwrite previous output files.
+* Adds 'add' argument to createReplicates() to prevent unintending overwriting of encounter history files Defaults to add=F, which returns an error if previous encounter history files are present and restarts N_final.txt counts
+###### Bug fixes
+* Check for NaNs when dropping individuals in encounter.history()
+* Updates labels for RMark results in wolverine_analysis
+* Match extent for SamplingFrame and Habitat example layers

@@ -12,6 +12,7 @@ createReplicates<-function(n_runs, map, Parameters, ... ){
     saveGrid<-setDefault(additional.args$saveGrid, 1)
     skipConfirm<-setDefault(additional.args$skipConfirm, F)
     add<-setDefault(additional.args$add, F)
+    overwrite<-setDefault(additional.args$overwrite, F)
 
   # 0. Set up files
     if(!skipConfirm){
@@ -32,12 +33,12 @@ createReplicates<-function(n_runs, map, Parameters, ... ){
    if(!file.exists(output.dir)) dir.create(output.dir)
    if(printN){
      printN<-paste0(output.dir,'/N_final.txt')
-     if(add==F){
+     if(overwrite){
       message(paste('Restarting', printN))
       file.remove(printN)
      }}
 
-   prevPList<-paste0(output.dir,'/Parameters.rdata'))
+   prevPList<-paste0(output.dir,'/Parameters.rdata')
   
   # 1. Enter parameters
   if(missing(Parameters)) {
@@ -52,7 +53,7 @@ createReplicates<-function(n_runs, map, Parameters, ... ){
   } else {
     if(add==T){
       if(file.exists(prevPList)){
-        warning(paste0('Using existing parameters list for scenario from: ', prevPList)))
+        warning(paste0('Using existing parameters list for scenario from: ', prevPList))
         rm('Parameters')
         load(prevPList)
       }}
@@ -70,7 +71,8 @@ createReplicates<-function(n_runs, map, Parameters, ... ){
   # 2.5 Shift start for indices if needed
   n.prevFiles<-length(dir(folder.dir, pattern=base.name))
   rn.start<-ifelse(add, n.prevFiles, 0)
-  if(add==F & n.prevFiles>0) stop(paste('Existing rSPACE runs found in', folder.dir, '\n Delete or use add=T to add runs to folder'))
+  if(add==F & n.prevFiles>0 & overwrite==F) 
+    stop(paste('\nExisting rSPACE runs found in', folder.dir, '\n Use "overwrite=T" to replace or "add=T" to add to existing folder'))
     
   # 3. Simulate encounter histories loop ##
   for(rn in (1:n_runs)+rn.start){
