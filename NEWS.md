@@ -15,6 +15,7 @@ rSPACE 1.0.0
 ###### Changes
 * No longer allows NAs in Habitat or filter maps.  Returns errors rather than trying to fix
 * Add saveGrid option to create.landscapes() with default to TRUE.  Will produce a raster layer of the grid used in the simulation in the output folder.
+
 ###### Bug fixes
 * Error message added for empty grids
 * Fixed ratio for creating effective sampling areas
@@ -24,6 +25,7 @@ rSPACE 1.0.0
 ###### Changes
 * Cleaning up and adding example scripts
 * Updating documentation
+
 ###### Bug fixes
 * Cleaning up clicky box errors, and setting default detP=1
 * Bugs for printing figures in showSteps=T in encounter.history()
@@ -36,6 +38,7 @@ rSPACE 1.0.0
 * Updating check procedure for previous Parameters file.
 * Now produces error if trying to overwrite previous output files.
 * Adds 'add' argument to createReplicates() to prevent unintending overwriting of encounter history files Defaults to add=F, which returns an error if previous encounter history files are present and restarts N_final.txt counts
+
 ###### Bug fixes
 * Check for NaNs when dropping individuals in encounter.history()
 * Updates labels for RMark results in wolverine_analysis
