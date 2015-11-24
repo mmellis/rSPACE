@@ -31,7 +31,7 @@ encounter.history <- function(map, Parameters, ...){
   n_visits <- Parameters$n_visits
   n_yrs <- Parameters$n_yrs
 
-  lmda <- rep(Parameters$lmda, length.out=(n_yrs - 1))
+
 
   if(showSteps == T)
     cat('\nBuilding landscape...\n'); flush.console()
@@ -49,6 +49,16 @@ encounter.history <- function(map, Parameters, ...){
 
   wolv <- addN(Parameters$N, map, Parameters)
   wolv.df <- wolv.dataframe(wolv)
+
+  if(is.null(Parameters$trendtype) | Parameters$trendtype=='abundance-exponential'){
+    lmda <- rep(Parameters$lmda, length.out=(n_yrs - 1))
+  } else if(Parameters$trendtype == 'abundance-linear'){
+    lmda <- local({
+      indToDrop<-Parameters$N*(1-Parameters$lmda^(n_yrs - 1))/(n_yrs - 1)
+      return(1-indToDrop/(Parameters$N-indToDrop*(1:(n_yrs-1) - 1)))
+    })
+  } else { stop('Unknown trend type') } 
+      
 
   # 2. Make use surface
   useLayer <- build.useLayer(map, wolv, Parameters)
@@ -152,7 +162,8 @@ encounter.history <- function(map, Parameters, ...){
        cat(nrow(wolv.df),' ',sep='',file=printN,append=T)  # Store population sizes by year
 
       # 6. Calculate population change between t and t+1
-      dN <- round(nrow(wolv.df)*(lmda[tt-1] - 1))
+      dN <- nrow(wolv.df)*(lmda[tt-1] - 1)
+      dN <- floor(dN) + rbinom(1,1,prob=dN%%1)
 
       # 7. Implement population change
        if(dN>0){

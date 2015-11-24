@@ -29,6 +29,8 @@ checkMap<-function(map, filter.map){
 
 # Check parameter list for missing values, update names, etc
 checkParameters<-function(pList,argList){
+  if(is.null(pList$trendtype))
+    pList$trendtype <- "abundance-exponential"
 
   if(is.null(pList$maxDistQ))
     pList$maxDistQ <- rep(1, length(pList$MFratio))
