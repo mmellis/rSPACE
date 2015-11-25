@@ -150,7 +150,7 @@ encounter.history <- function(map, Parameters, ...){
     prev.ask <- devAskNewPage(ask=prev.ask)
     rm('prev.ask', 'ExampleLayer')
 
-    cat('\nPopulation totals by year\n')
+    cat('\nPopulation totals by year...\n')
     flush.console()
   }
 
@@ -187,15 +187,15 @@ encounter.history <- function(map, Parameters, ...){
     }} # End year loop (and if statement)
 
   PopulationTotals<-data.frame(rn = rn, Year = 1:n_yrs-1, N = N,
-       psi_1visit=unname(apply(P.pres, 2, sum)/nrow(P.pres))
-     psi_maxvisit=unname(apply(P.pres, 2, function(x) sum(1-(1-x)^n_visits))/nrow(P.pres))
-         psi_asym=unname(apply(P.pres, 2, function(x) sum(x>0))/nrow(P.pres)))
+     truePsi_1visit=unname(apply(P.pres, 2, sum)/nrow(P.pres)),
+     truePsi_MaxVisits=unname(apply(P.pres, 2, function(x) sum(1-(1-x)^n_visits))/nrow(P.pres)),
+     truePsi_Asymptotic=unname(apply(P.pres, 2, function(x) sum(x>0))/nrow(P.pres)))
          
   if(printN!=0)
     write.table(PopulationTotals,file=printN, row.names=F, col.names=F, append=T)    
 
   if(showSteps){
-    print(PopulationTotals, row.names=F)
+    print(PopulationTotals[,-1], row.names=F)
     answer <- readline(prompt='\nSave grid to file as raster (y/n)?  ')
     if(tolower(answer)=='y'){
       writeRaster(setValues(map, grid_layer), 'ExampleGrid.tif', overwrite=T)
@@ -208,5 +208,7 @@ encounter.history <- function(map, Parameters, ...){
                                       rep(c('p','ch'),each=n_yrs), sep='.')
       encounter_history <- encounter_history[,order(rep(1:n_yrs,2))]
     return(encounter_history)
+  } else if(printN==0){
+    return(PopulationTotals)
   } else return(apply(encounter_history,1,paste, collapse=''))
 }
