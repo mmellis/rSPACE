@@ -25,6 +25,7 @@ encounter.history <- function(map, Parameters, ...){
     filter.map <- add.args$filter.map
     showSteps <- setDefault(add.args$showSteps, F)
     printN <- setDefault(add.args$printN, 0)
+    rn <- setDefault(add.args$rn, 0)
 
   Parameters <- checkParameters(Parameters, add.args)
 
@@ -66,10 +67,12 @@ encounter.history <- function(map, Parameters, ...){
   # 3. Calculate probability by grid
   P.pres <- matrix(0, nrow=n_cells, ncol=n_yrs)
   P.pres[,1] <- probPRES(useLayer, grid_layer)
+  N <- rep(0, n_yrs)
+  N[1] <- nrow(wolv.df)
 
   # 3b. (Optional) Output plots with first year data
   if(showSteps){
-    printN <- ""  # Cause printN to print to console
+    printN <- 0  # Cause printN to print to console
     x <- y <- z <- type <- NULL
 
     prev.ask <- devAskNewPage(ask=T)
@@ -147,7 +150,7 @@ encounter.history <- function(map, Parameters, ...){
     prev.ask <- devAskNewPage(ask=prev.ask)
     rm('prev.ask', 'ExampleLayer')
 
-    cat('\nTotal number of individuals by year\n')
+    cat('\nPopulation totals by year\n')
     flush.console()
   }
 
@@ -158,8 +161,6 @@ encounter.history <- function(map, Parameters, ...){
   # 5. Loop over years to fill in encounter_history
   if(n_yrs > 1){
    for(tt in 2:n_yrs){
-      if(printN!=0)
-       cat(nrow(wolv.df),' ',sep='',file=printN,append=T)  # Store population sizes by year
 
       # 6. Calculate population change between t and t+1
       dN <- nrow(wolv.df)*(lmda[tt-1] - 1)
@@ -179,16 +180,22 @@ encounter.history <- function(map, Parameters, ...){
 
       # 8. Sample detections and update encounter_history
       P.pres[,tt] <- probPRES(useLayer, grid_layer)
+      N[tt] <- nrow(wolv.df)
 
       encounter_history[,tt] <- sapply(1:n_cells,
           function(i) paste(rbinom(n=n_visits, size=1, prob=P.pres[i,tt]), collapse=''))
     }} # End year loop (and if statement)
 
-
+  PopulationTotals<-data.frame(rn = rn, Year = 1:n_yrs-1, N = N,
+       psi_1visit=unname(apply(P.pres, 2, sum)/nrow(P.pres))
+     psi_maxvisit=unname(apply(P.pres, 2, function(x) sum(1-(1-x)^n_visits))/nrow(P.pres))
+         psi_asym=unname(apply(P.pres, 2, function(x) sum(x>0))/nrow(P.pres)))
+         
   if(printN!=0)
-    cat(nrow(wolv.df),'\n',sep='',file=printN,append=T)  # Initial population size
+    write.table(PopulationTotals,file=printN, row.names=F, col.names=F, append=T)    
 
   if(showSteps){
+    print(PopulationTotals, row.names=F)
     answer <- readline(prompt='\nSave grid to file as raster (y/n)?  ')
     if(tolower(answer)=='y'){
       writeRaster(setValues(map, grid_layer), 'ExampleGrid.tif', overwrite=T)

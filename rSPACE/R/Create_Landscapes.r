@@ -77,7 +77,7 @@ createReplicates<-function(n_runs, map, Parameters, ... ){
   # 3. Simulate encounter histories loop ##
   for(rn in (1:n_runs)+rn.start){
     cat(rn,'\n');flush.console()
-    ch<-encounter.history(map, Parameters, grid_layer=grid_layer, n_cells=length(gridIDs), printN=printN)
+    ch<-encounter.history(map, Parameters, grid_layer=grid_layer, n_cells=length(gridIDs), printN=printN, rn=rn)
   
     # 4. Output encounter history
     output_file<-paste(folder.dir,'/',base.name,rn,".txt",sep='')
