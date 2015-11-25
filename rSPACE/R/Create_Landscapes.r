@@ -9,7 +9,7 @@ createReplicates<-function(n_runs, map, Parameters, ... ){
     filter.map<-additional.args$filter.map
     printN<-setDefault(additional.args$printN, 1)
     saveParameters<-setDefault(additional.args$saveParameters, 1)
-    saveGrid<-setDefault(additional.args$saveGrid, 1)
+    saveGrid<-setDefault(additional.args$saveGrid, 0)
     skipConfirm<-setDefault(additional.args$skipConfirm, F)
     add<-setDefault(additional.args$add, F)
     overwrite<-setDefault(additional.args$overwrite, F)

@@ -51,17 +51,18 @@ addN<-function(dN, map, Parameters, wolv.df = NULL){
               currentLocations <- wolv.df[wolv.df$type==x,]$locID
               currentLocations <- coordinates(map)[currentLocations, ]
               distances <- distanceFromPoints(map, currentLocations)
-              territoryOK <- getValues(distances) > Parameters$buffer[x]
+              territoryOK <- getValues(distances)/1000 > Parameters$buffer[x]
 
               useLocations <- which(habitatOK & territoryOK)
-              newInd<-placeIndividuals(map = map,
-                            use    = useLocations,
-                            N      = round(dN*Parameters$MFratio[x]),
-                            buffer = Parameters$buffer[x],
-                            wght  = Parameters$wghts)
+              if(length(useLocations)>0){
+                newInd<-placeIndividuals(map = map,
+                              use    = useLocations,
+                              N      = round(dN*Parameters$MFratio[x]),
+                              buffer = Parameters$buffer[x],
+                              wght  = Parameters$wghts)
 
-              useLocations[newInd]
-              })
+              return(useLocations[newInd])
+              } else return(NULL) })
   }
   return(new.wolv)
 }

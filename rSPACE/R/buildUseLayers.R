@@ -27,6 +27,7 @@ build.useLayer<-function(map, wolv, Parameters, Example=F){
 
 # Single group probability of use --------------------------------
 use_surface<-function(Wolv, howmuch, howfar, map, trunk = trunk){
+  if(is.null(Wolv)) return(rep(0, length(getValues(map))))
   sdXY<-solveSD(howmuch, howfar, map)
 
   if(trunk > 1 | trunk < 0)
