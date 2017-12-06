@@ -12,7 +12,7 @@ switcheroo<-function(x,detP) {                                                 #
     if(x[i]=="1"){if(rbinom(1,1,prob=detP)==0) {x[i]="0"}}                     #
     }                                                                          #
     return(x)                                                                  #
-  }                                                                            #                                                                          #
+  }                                                                            #
                                                                                #
 drop_visits<-function(ch, n_visits, n_yrs, n_visit){                           #
   tmp<-rep(F,n_visits)                                                         #
@@ -68,7 +68,7 @@ adjust_detP<-function(detP_test,detP1=1){                                      #
                                                                                #
                                                                                #
 file_label<-function(filename){                                                #
-  filename<-unlist(lapply(strsplit(filename,'/'),function(x) rev(x)[1]))       #
+  filename<-basename(filename)                                                 #
   filename<-gsub('.txt','',filename)                                           #
   return(filename)                                                             #
 }                                                                              #
@@ -91,6 +91,7 @@ testReplicates<-function(folder, Parameters, ... ){
     FPCind       <-setDefault(additional.args$FPC, TRUE)
     skipConfirm  <-setDefault(additional.args$skipConfirm, F)
     overwrite    <-setDefault(additional.args$overwrite, F)
+    add          <-setDefault(additional.args$add, F)
 
 
    if(!skipConfirm){
@@ -111,7 +112,9 @@ testReplicates<-function(folder, Parameters, ... ){
   RunAnalysis<-get(function_name)
   
   # All encounter history files to test
-  output_files = dir(folder, pattern=paste0('^',base.name),full.names=T)  
+  output_files = dir(folder, full.names=T,
+    pattern=paste0('^',paste(base.name, collapse='|')))
+
 
   # Set up output folder/file for results
   folder<-paste0(folder,'/output')
@@ -119,13 +122,37 @@ testReplicates<-function(folder, Parameters, ... ){
     dir.create(folder) 
        
   results_file<-paste(folder,results.file,sep="/")
-  if(file.exists(results_file) & !overwrite)
-    stop(paste0("'",results.file,"' already exists; use overwrite=TRUE"))
-     
+  if(file.exists(results_file) & !overwrite & !add)
+    stop(paste0("'",results.file,"' already exists; use overwrite=TRUE or add=TRUE or specify a new filename using results.file"))
+  if(!file.exists(results.file)) 
+    add <- FALSE   
   
-  sim_results<-RunAnalysis(n_yrs)
-  cat(c(names(sim_results),"n_grid","n_visits","detP","alt_model","rn","\n"), 
-    file=results_file)
+  if(add){
+    message("Appending to previous results. If you've changed simulation parameters, this is a BAD IDEA!")
+      sim_results<-read.table(results_file, header=T)
+      DF<-ddply(sim_results, .(rn), nrow)
+      if(nrow(DF)==1){
+        message('Only one previous scenario (unknown completion); restarting results file')
+        add <- FALSE
+      }
+      tab<-tabulate(DF$V1); drop.files<-c()
+      if(length(tab)==1)
+        drop.files<-unique(paste(DF$rn))
+      if(length(tab)>2 | tab[1] > 1)
+        stop('Inconsistent number of subsets in results; specify files to analyze using base.name argument')
+      if(length(tab)==2 & tab[1]==1){
+        drop.files<-unique(paste(DF$rn[DF$V1 == max(DF$V1)]))
+        sim_results<-sim_results[sim_results$rn != paste(DF$rn[which.min(DF$V1)]),]
+        }
+
+     output_files <- output_files[!(file_label(output_files) %in% drop.files)]
+     rm(tab, drop.files)
+  }
+  if( !add ){
+    sim_results<-RunAnalysis(n_yrs)
+    cat(c(names(sim_results),"n_grid","n_visits","detP","alt_model","rn","\n"),
+      file=results_file)
+  }
   
   
   # Parameters to vary
@@ -145,7 +172,7 @@ testReplicates<-function(folder, Parameters, ... ){
   if(is.null(n_runs)) n_runs<-length(output_files)
   index<-rep(min_xxx:max_xxx,length.out=n_runs)
   for(rn in (1:n_runs)[index==xxx]){ 
-   cat('\n', rn, ' ');flush.console()
+   cat('\n', rn, ' ', file_label(output_files[rn]), ' ');flush.console()
    test<-readInput(output_files[rn])
     GRD<-test$GridID
     test<-test$ch
