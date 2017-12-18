@@ -65,7 +65,11 @@ wolverine_analysis<-function(n_yrs, ch=NULL, n_visit=NULL, sample_yr=0, FPC=1, .
           mark_data<-data.frame(ch=ch_gap,freq=rep(1,length(ch_gap)),stringsAsFactors=F)
           test_processed=process.data(mark_data,model="RDOccupEG",time.intervals=time_int(n_visit,n_yrs-1))
           test_ddl=make.design.data(test_processed)
-            gap_matrix = matrix(rep(c(1,1,rep(0,n_yrs-2)),length.out=4*(n_yrs-2)),n_yrs-2,4)
+            nt<-n_yrs%/%2-1
+            gap_matrix = matrix(rep(c(1,1,rep(0,2*nt)),length.out=2*nt^2),2*nt,nt)
+            if(n_yrs%%2==1)
+              gap_matrix<-rbind(cbind(gap_matrix,rep(0,nrow(gap_matrix))), 
+                c(rep(0,ncol(gap_matrix)),1))
             test_ddl$Epsilon$gap = -1*gap_matrix
             test_ddl$Gamma$gap = gap_matrix
   
