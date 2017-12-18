@@ -154,6 +154,13 @@ testReplicates<-function(folder, Parameters, ... ){
       file=results_file)
   }
   
+  # Checking sample_matrix
+  if(!is.null(sample_matrix)){
+     if(ncol(sample_matrix)!=Parameters$n_yrs){
+       message('Number of years in sample_matrix does not match n_yrs.  Resampling from sample_matrix')
+       sample_matrix<-sample_matrix[,sample(ncol(sample_matrix), Parameters$n_yrs, replace=T)]
+      }}
+       
   
   # Parameters to vary
   if(is.null(Parameters$n_visit_test)) Parameters$n_visit_test=2:Parameters$n_visits
