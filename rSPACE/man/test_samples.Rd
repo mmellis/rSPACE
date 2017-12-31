@@ -45,7 +45,7 @@ Optional argument \code{base.name} must be specified if an alternative base file
 Optional argument \code{FPC} indicates whether to use a finite population correction.  \code{FPC} defaults to TRUE; however, this option requires that a finite population correction is available in the analysis function.
 }
 
-Optional argument \code{sample_matrix} allows for irregular gaps in sampling histories.  Input should be a matrix with one column for each year of sampling, each entry should be a 1/0 reflected that a cell is visited/not visited in a given year.  Analysis function must be able to handle missing values.  Visitation history for stations will be randomly selected from rows of \code{sample_matrix}.  See \code{data(IrregularYrs)} for example.
+Optional argument \code{sample_matrix} allows for irregular gaps in sampling histories.  Input should be a matrix with one column for each year of sampling, each entry should be a 1/0 reflected that a cell is visited/not visited in a given year.  Analysis function must be able to handle missing values.  Visitation history for stations will be randomly selected from rows of \code{sample_matrix}.  See \code{data(IrregularYrs)} for an example of a 10 year sampling matrix.
 
 \value{
  Stores simulation results based on output specified in the analysis to \code{sim_results.txt}.  Returns time used for the function run.

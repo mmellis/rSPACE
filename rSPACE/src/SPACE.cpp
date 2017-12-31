@@ -281,8 +281,8 @@ void use_surface(double x_wolv[], double y_wolv[], int *N_wolv,
 	for(int px = 0; px < *pixels; px++)
 		snow[px] = 1 - overall_use[px]; // 1- probability of no wolverines = probability of at least one wolverine.
 
-	delete overall_use;
-	delete use;
+	delete[] overall_use;
+	delete[] use;
 }
 }
 /////////////////////////////////////////////////////////////////
@@ -402,6 +402,6 @@ void calc_prob(double use[], int grid[], int detection[], double *detectionP, in
 		test[i] = det[i]; //Returns detection probabilities for each grid index.
 	}                                                                                    
 
-	delete det;
+	delete[] det;
 }
 }
