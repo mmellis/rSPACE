@@ -1,4 +1,4 @@
-useDynLib(rSPACE)
+useDynLib(rSPACE, .registration = TRUE)
 import(RMark, ggplot2)
 importFrom(tcltk, 
   tkgrid,
@@ -43,7 +43,7 @@ importFrom(plyr,
              "heat.colors")
   importFrom("methods", "as", "slot")
   importFrom("stats", "loess", "predict", "qnorm", "rbinom", "runif")
-  importFrom("utils", "flush.console", "read.delim", "read.table")  
+  importFrom("utils", "flush.console", "read.delim", "read.table", "write.table")  
   
 export(enter.parameters)
 export(create.landscapes)
