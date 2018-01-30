@@ -46,8 +46,8 @@ use_surface<-function(Wolv, howmuch, howfar, map, trunk = trunk){
 
               as.double(c(sdXY[,1])),                # double sd_x[]
               as.double(c(sdXY[,2])),                # double sd_y[]
-              as.double(c(trunk))                    # double trunc_cutoff[]
-              )$use
+              as.double(c(trunk)),                   # double trunc_cutoff[]
+              package='rSPACE')$use
   return(USE)
   }
 

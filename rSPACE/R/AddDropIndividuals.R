@@ -24,8 +24,8 @@ placeIndividuals <- function(map, use, N, buffer, wght=F){
                   as.double(buffer),          #Minimum distance between points
                   use = as.integer(use10),    #Indicator of whether to include or not
                   as.integer(n),              #Number of snow_points to check (maxid)
-                  as.integer(smp - 1)         #Random order to use (shift for C indexing)
-                )$use
+                  as.integer(smp - 1),        #Random order to use (shift for C indexing)
+                package='rSPACE')$use
 
    return((1:n)[USE==1])
 }

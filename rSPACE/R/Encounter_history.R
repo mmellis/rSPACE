@@ -9,8 +9,8 @@ probPRES<-function(surface, gridvec, detP=1){
                   as.double(detP),                                      #detection probability
                   as.integer(length(surface)),                          #pixels
                   as.integer(max(gridvec)),                             #max_grid
-                  occP = as.double(runif(n=(max(gridvec)+1)))          #test values, output detection probabilities
-                 )$occP[(unique(gridvec)+1)[-1]]
+                  occP = as.double(runif(n=(max(gridvec)+1))),          #test values, output detection probabilities
+                 package='rSPACE')$occP[(unique(gridvec)+1)[-1]]
   USE[USE<0]=0
   USE[USE>1]=1
   return(USE)

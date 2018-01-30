@@ -50,8 +50,8 @@ makeGrid<-function(map, gridsize){
                     as.double(y),                     #Latitude
                     as.double(gridsize),              #Desired grid size (100km2)
                     as.integer(n),                    # #pixels
-                    gridvec = as.integer(rep(0,n))    # grid vector
-                  )$gridvec
+                    gridvec = as.integer(rep(0,n)),   # grid vector
+                  package='rSPACE')$gridvec
    } else if(isUTM){
        map_xy<-dim(map)[2:1] # x = columns, y=rows; values by row
        nxy=ceiling(sqrt(gridsize)*1000/res(map))
