@@ -92,6 +92,7 @@ testReplicates<-function(folder, Parameters, ... ){
     skipConfirm  <-setDefault(additional.args$skipConfirm, F)
     overwrite    <-setDefault(additional.args$overwrite, F)
     add          <-setDefault(additional.args$add, F)
+    randomize    <-setDefault(additional.args$randomize, T)
 
 
    if(!skipConfirm){
@@ -183,7 +184,10 @@ testReplicates<-function(folder, Parameters, ... ){
    test<-readInput(output_files[rn])
     GRD<-test$GridID
     test<-test$ch
+     
    use = sample(match(GRDuse, GRD), gridTotal)
+   if(!is.null(randomize))
+    if(!randomize) {use<-1:gridTotal}
 
    detPhold = 1
   
