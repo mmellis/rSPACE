@@ -10,23 +10,14 @@ placeIndividuals <- function(map, use, N, buffer, wght=F){
      smp <- sample(n, n)
    }
 
-   x <- coordinates(map)[use, 1]
-   y <- coordinates(map)[use, 2]
+   xy <- coordinates(map)[use, ]
    isLongLat <- as.numeric(grepl('+proj=longlat',proj4string(map)))
+   stopifnot(!isLongLat)
 
    use10 <- rep(0, n)
-    use10[smp[1]] <- isLongLat
+    #use10[smp[1]] <- isLongLat
 
-   USE = .C('sample_ind',
-                  as.double(x),               #Longitude
-                  as.double(y),               #Latitude
-                  as.integer(N),              #Desired number of wolverines to place
-                  as.double(buffer),          #Minimum distance between points
-                  use = as.integer(use10),    #Indicator of whether to include or not
-                  as.integer(n),              #Number of snow_points to check (maxid)
-                  as.integer(smp - 1),        #Random order to use (shift for C indexing)
-                package='rSPACE')$use
-
+   USE <- new_sample(xy, N, buffer, use10, smp)
    return((1:n)[USE==1])
 }
 

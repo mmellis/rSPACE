@@ -1,153 +1,149 @@
 // Accumulation of all final code for wolverine simulations
 // 4/22/2011 - edits since last build.
 
-
 #include<fstream>
 #include<cmath>
 #include<cstdlib>
 #include<ctime>
 #include<iostream>
+#include <Rcpp.h>
 
-#define COMPILE_WITH_R 1
+using namespace Rcpp;
 
-using namespace std;
-
-///////////////////////////////////////////////////////////////
-// Calculate distance between two points using latlong coordinates
-///////////////////////////////////////////////////////////////
-
-double rdist_earth(double long1, double lat1, double long2, double lat2)
-{	
-	double newdist;
-	const double PI = 3.141593;
-	const double R = 6378.388;  //radius of earth in km
-
-	double coslat1, sinlat1, coslon1, sinlon1;
-	double coslat2, sinlat2, coslon2, sinlon2;
-
-	coslat1 = cos(lat1*PI/180); //Uses formula from R: rdist.earth()
-	sinlat1 = sin(lat1*PI/180);
-	coslon1 = cos(long1*PI/180);
-	sinlon1 = sin(long1*PI/180);
-
-	coslat2 = cos(lat2*PI/180);
-	sinlat2 = sin(lat2*PI/180);
-	coslon2 = cos(long2*PI/180);
-	sinlon2 = sin(long2*PI/180);
-
-	newdist = coslat1*coslon1*coslat2*coslon2 + 
-		coslat1*sinlon1*coslat2*sinlon2 + 
-		sinlat1*sinlat2;
-	
-	if(fabs(newdist)>1)
-		newdist = newdist/fabs(newdist);
-	newdist = R * acos(newdist);
-
-	return newdist;
-}
-
-///////////////////////////////////////////////////////////////
-// Calculate distance between two points using km
-///////////////////////////////////////////////////////////////
-
-double rdist_km(double x1, double y1, double x2, double y2)
-{	
-	double newdist;
-	newdist = sqrt(pow(x2-x1,2)+pow(y2-y1,2))/1000;
-	return newdist;
-}
-
-///////////////////////////////////////////////////////////////
-// Create a grid for the landscape
-///////////////////////////////////////////////////////////////
-
-
-extern "C" {void make_grid(double x[], double y[], double *grid_size, int *pixels, int grid[])
-{
-	double disttest = sqrt(*grid_size);
-
-	//Size of grid in km (at narrowest)
-	double dist_x, dist_y;
-	dist_x = rdist_earth(x[0], y[0], x[*pixels-1], y[0]); 
-	dist_y = rdist_earth(x[0], y[0], x[0], y[*pixels-1]);
-
-	// Size of grid in pixels (constant)
-	int n_pxls_x = 0;  //# pixels is constant, size in km changes
-	while( y[n_pxls_x] == y[0] )
-		n_pxls_x++;
-	int n_pxls_y = *pixels / n_pxls_x;
-
-	int n_cells[3];
-	n_cells[0] = n_pxls_x / int(ceil(disttest * n_pxls_x / dist_x)); //Integer division to make sure number of pixels is consistent
-	n_cells[1] = n_pxls_y / int(ceil(disttest * n_pxls_y / dist_y));
-	n_cells[2] = int(n_cells[0]*n_cells[1]); 
-
-	int origin = 0;
-	int test = 1;
-	int move = 0;
-	bool ok = 1;
-	bool test_x = 0;
-	bool test_y = 0;
-
-	for(int cn = 1; cn <= n_cells[2]; cn++)
-	{	
-		test = origin;
-		if(test < *pixels) 
-			ok = 1;
-		// Test distance from origin for each pixel
- 		while(ok)
-		{	
-			test_x = (rdist_earth(x[origin], y[test], x[test], y[test]) <= disttest);
-			test_y = (rdist_earth(x[test], y[origin], x[test], y[test]) <= disttest);
-			if(test_x && test_y)
-			{
-				grid[test] = cn;
-				test++;
-			}
-			else if(test_y)
-			{	
-				move=0;
-				while(!((x[origin] <= x[test + move]) && (y[test] > y[test + move])))
-					move++; // skips to one row down from the previous point
-				test = test + move;
-			}
-			else
-				ok = 0;
-			if(test >= *pixels)
-				ok=0;
-		}
-		// Find the next origin point 
-		if(cn % n_cells[0] > 0)
-			while(grid[origin] == cn)
-				origin++;
-		else if(cn % n_cells[0] == 0)
-		{
-			origin = test;
-			while(y[origin] == y[origin - 1])
-				origin--;
-		}
-	}
-
-	// Shift grid to center
-	for(int row = 0; row < (n_pxls_y-1); row++)
-	{
-		int ct = 0;
-		while((grid[n_pxls_x * (row + 1) - (ct + 1)] == 0) && (ct <= n_pxls_x))  //Count the # trailing zeroes
-			ct++;
-		if(ct < n_pxls_x) 
-		{ 
-			ct = ct/2;	//Integer division (5/2 = 2).
-			for(int col = n_pxls_x; col > ct; col--)
-				grid[row * n_pxls_x + col - 1] = grid[row * n_pxls_x + col - 1 - ct]; 
-			for(int col = 0; col < ct; col++)
-				grid[row * n_pxls_x + col] = 0;
-		}
-	}
-
-	*grid_size = double(n_cells[2]); // Returns the total number of cells included (0s indicate not pixels not included in any cell).
-									//Slightly larger than actual value due to rounding issues (not square).
-}
-}
+/////////////////////////////////////////////////////////////////
+//// Calculate distance between two points using latlong coordinates
+/////////////////////////////////////////////////////////////////
+//
+//double rdist_earth(double long1, double lat1, double long2, double lat2)
+//{	
+//	double newdist;
+//	//double PI = 3.141593;  //stored in Rcpp
+//	double R = 6378.388;  //radius of earth in km
+//
+//	double coslat1, sinlat1, coslon1, sinlon1;
+//	double coslat2, sinlat2, coslon2, sinlon2;
+//
+//	coslat1 = cos(lat1*PI/180); //Uses formula from R: rdist.earth()
+//	sinlat1 = sin(lat1*PI/180);
+//	coslon1 = cos(long1*PI/180);
+//	sinlon1 = sin(long1*PI/180);
+//
+//	coslat2 = cos(lat2*PI/180);
+//	sinlat2 = sin(lat2*PI/180);
+//	coslon2 = cos(long2*PI/180);
+//	sinlon2 = sin(long2*PI/180);
+//
+//	newdist = coslat1*coslon1*coslat2*coslon2 + 
+//		coslat1*sinlon1*coslat2*sinlon2 + 
+//		sinlat1*sinlat2;
+//	
+//	if(fabs(newdist)>1)
+//		newdist = newdist/fabs(newdist);
+//	newdist = R * acos(newdist);
+//
+//	return newdist;
+//} 
+//
+/////////////////////////////////////////////////////////////////
+//// Calculate distance between two points using km
+/////////////////////////////////////////////////////////////////
+//double rdist_km(double x1, double y1, double x2, double y2)
+//{	
+//	double newdist;
+//	newdist = sqrt(pow(x2-x1,2)+pow(y2-y1,2))/1000;
+//	return newdist;
+//} 
+//
+/////////////////////////////////////////////////////////////////
+//// Create a grid for the landscape
+/////////////////////////////////////////////////////////////////
+//
+//void make_grid(double x[], double y[], double *grid_size, int *pixels, int grid[])
+//{
+//	double disttest = sqrt(*grid_size);
+//
+//	//Size of grid in km (at narrowest)
+//	double dist_x, dist_y;
+//	dist_x = rdist_earth(x[0], y[0], x[*pixels-1], y[0]); 
+//	dist_y = rdist_earth(x[0], y[0], x[0], y[*pixels-1]);
+//
+//	// Size of grid in pixels (constant)
+//	int n_pxls_x = 0;  //# pixels is constant, size in km changes
+//	while( y[n_pxls_x] == y[0] )
+//		n_pxls_x++;
+//	int n_pxls_y = *pixels / n_pxls_x;
+//
+//	int n_cells[3];
+//	n_cells[0] = n_pxls_x / int(ceil(disttest * n_pxls_x / dist_x)); //Integer division to make sure number of pixels is consistent
+//	n_cells[1] = n_pxls_y / int(ceil(disttest * n_pxls_y / dist_y));
+//	n_cells[2] = int(n_cells[0]*n_cells[1]); 
+//
+//	int origin = 0;
+//	int test = 1;
+//	int move = 0;
+//	bool ok = 1;
+//	bool test_x = 0;
+//	bool test_y = 0;
+//
+//	for(int cn = 1; cn <= n_cells[2]; cn++)
+//	{	
+//		test = origin;
+//		if(test < *pixels) 
+//			ok = 1;
+//		// Test distance from origin for each pixel
+// 		while(ok)
+//		{	
+//			test_x = (rdist_earth(x[origin], y[test], x[test], y[test]) <= disttest);
+//			test_y = (rdist_earth(x[test], y[origin], x[test], y[test]) <= disttest);
+//			if(test_x && test_y)
+//			{
+//				grid[test] = cn;
+//				test++;
+//			}
+//			else if(test_y)
+//			{	
+//				move=0;
+//				while(!((x[origin] <= x[test + move]) && (y[test] > y[test + move])))
+//					move++; // skips to one row down from the previous point
+//				test = test + move;
+//			}
+//			else
+//				ok = 0;
+//			if(test >= *pixels)
+//				ok=0;
+//		}
+//		// Find the next origin point 
+//		if(cn % n_cells[0] > 0)
+//			while(grid[origin] == cn)
+//				origin++;
+//		else if(cn % n_cells[0] == 0)
+//		{
+//			origin = test;
+//			while(y[origin] == y[origin - 1])
+//				origin--;
+//		}
+//	}
+//
+//	// Shift grid to center
+//	for(int row = 0; row < (n_pxls_y-1); row++)
+//	{
+//		int ct = 0;
+//		while((grid[n_pxls_x * (row + 1) - (ct + 1)] == 0) && (ct <= n_pxls_x))  //Count the # trailing zeroes
+//			ct++;
+//		if(ct < n_pxls_x) 
+//		{ 
+//			ct = ct/2;	//Integer division (5/2 = 2).
+//			for(int col = n_pxls_x; col > ct; col--)
+//				grid[row * n_pxls_x + col - 1] = grid[row * n_pxls_x + col - 1 - ct]; 
+//			for(int col = 0; col < ct; col++)
+//				grid[row * n_pxls_x + col] = 0;
+//		}
+//	}
+//
+//	*grid_size = double(n_cells[2]); // Returns the total number of cells included (0s indicate not pixels not included in any cell).
+//									//Slightly larger than actual value due to rounding issues (not square).
+//} 
+//
 /////////////////////////////////////////////////////////////////
 //// Remove parts of grid that aren't in snow areas
 /////////////////////////////////////////////////////////////////
@@ -196,7 +192,7 @@ extern "C" {void make_grid(double x[], double y[], double *grid_size, int *pixel
 // Sampling part - setting out homeranges on landscape
 ///////////////////////////////////////////////////////////////
 
-extern "C" {
+// [[Rcpp::export]]
 void sample_ind(double x[], double y[], int *N, double *buffer, int use[], int *maxid, int new_order[])
 {
   int longlat;
@@ -236,11 +232,11 @@ void sample_ind(double x[], double y[], int *N, double *buffer, int use[], int *
 	}
 	*N = ct; //Replaces # desired points with # actually fit.
 }
-}
+
 ///////////////////////////////////////////////////////////////
 // Create use surface based on home range center locations
 ///////////////////////////////////////////////////////////////
-extern "C" {
+// [[Rcpp::export]]
 void use_surface(double x_wolv[], double y_wolv[], int *N_wolv,
 		 double x[], double y[], double snow[], int *pixels,
 		 double *sd_x, double *sd_y, double *trunc_cutoff)
@@ -284,7 +280,7 @@ void use_surface(double x_wolv[], double y_wolv[], int *N_wolv,
 	delete[] overall_use;
 	delete[] use;
 }
-}
+
 /////////////////////////////////////////////////////////////////
 //// Remove individuals based on a population growth rate
 /////////////////////////////////////////////////////////////////
@@ -382,7 +378,7 @@ void use_surface(double x_wolv[], double y_wolv[], int *N_wolv,
 ///////////////////////////////////////////////////////////////
 // Decide if there were actually detections or not.
 ///////////////////////////////////////////////////////////////
-extern "C" {
+// [[Rcpp::export]]
 void calc_prob(double use[], int grid[], int detection[], double *detectionP, int *pixels, int *max_grid, double test[])
 {
 	int i;
@@ -403,5 +399,4 @@ void calc_prob(double use[], int grid[], int detection[], double *detectionP, in
 	}                                                                                    
 
 	delete[] det;
-}
 }

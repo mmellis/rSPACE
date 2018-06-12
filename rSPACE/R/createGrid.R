@@ -36,41 +36,35 @@ createGrid<-function(map, pList, filter.map=NULL){
 
 
 # Make rectangular grid -----------------------------------------
-makeGrid<-function(map, gridsize){
-   n <- length(getValues(map))
-   x <- coordinates(map)[, 1]
-   y <- coordinates(map)[, 2]
-   
-   isLongLat <- grepl('+proj=longlat', proj4string(map))
-   isUTM     <- grepl('+proj=utm', proj4string(map))
+makeGrid<-function(map, gridsize, type='square'){
+  if (!type %in% c("square", "hexagonal")) {
+    stop("Type must be either 'square' or 'hexagonal'")}
+ 
+ x<-as(extent(map), 'SpatialPolygons')
 
-   if(isLongLat){
-     use <- .C('make_grid',
-                    as.double(x),                     #Longitude
-                    as.double(y),                     #Latitude
-                    as.double(gridsize),              #Desired grid size (100km2)
-                    as.integer(n),                    # #pixels
-                    gridvec = as.integer(rep(0,n)),   # grid vector
-                  package='rSPACE')$gridvec
-   } else if(isUTM){
-       map_xy<-dim(map)[2:1] # x = columns, y=rows; values by row
-       nxy=ceiling(sqrt(gridsize)*1000/res(map))
-       skip_xy<-map_xy %% nxy
-       n_cells<-(map_xy-skip_xy) %/% nxy
+ if(grepl('longlat', projection(map))){
+  stop("Please switch to planar projection") }
+    
+ if (type == "square") {
+    cell_width <- sqrt(gridsize)    # Must match units of raster
+  } else if (type == "hexagonal") {
+    cell_width <- sqrt(2 * gridsize / sqrt(3))
+  }
   
-      gridDF<-expand.grid(x=1:map_xy[1], y=1:map_xy[2], value=0)
-      keeppixels<-(gridDF$x > floor(skip_xy[1]/2)) &
-                  (gridDF$x <= map_xy[1]-ceiling(skip_xy[1]/2)) &
-                  (gridDF$y > floor(skip_xy[2]/2)) &
-                  (gridDF$y <= map_xy[2]-ceiling(skip_xy[2]/2))
-      gridDF$value[keeppixels]<-
-        rep(rep(rep(1:n_cells[1], each=nxy[1]),nxy[2]), n_cells[2])+
-        rep(seq(from=0,by=n_cells[1], length.out=n_cells[2]), each=(n_cells[1]*nxy[1]*nxy[2]))
-  
-      use <- gridDF$value
-  } else stop('Map must be either longlat or utm')
-  
-  return(use) 
+  projection(x) <- projection(map)
+
+ if (type == "square") {
+    g <- raster(x, resolution = cell_width )
+    g <- as(g, "SpatialPolygons")
+  } else if (type == "hexagonal") {
+    g <- spsample(x, type = "hexagonal", cellsize = cell_width, offset = c(0, 0))
+    g <- HexPoints2SpatialPolygons(g, dx = cell_width)
+  }
+
+  g <- rgeos::gIntersection(g, x, byid = TRUE)
+  g <- g[round(area(g)) == max(round(area(g))), ]
+
+  return(g) 
 }
 
 # 1st filter: meet minimum habitat threshold --------------------

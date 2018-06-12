@@ -1,4 +1,5 @@
 useDynLib(rSPACE, .registration = TRUE)
+importFrom(Rcpp, sourceCpp)
 import(RMark, ggplot2)
 importFrom(tcltk, 
   tkgrid,
