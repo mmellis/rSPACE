@@ -34,20 +34,12 @@ use_surface<-function(Wolv, howmuch, howfar, map, trunk = trunk){
     stop('Invalid value for trunction')
   trunk<-ifelse(trunk==1, 0, qnorm((1 + trunk) / 2))
 
-  USE = .C('use_surface',
-              as.double(coordinates(map)[Wolv,1]),   #x_wolv
-              as.double(coordinates(map)[Wolv,2]),   #y_wolv
-              as.integer(length(Wolv)),              #N_wolv
+  xyzg<-cbind(coordinates(map), getValues(map), grid_layer)
+  USE = use_surfaceC(coordinates(map)[Wolv,], 
+                     xyzg, 
+                     length(unique(c(grid_layer,0))), 
+                     sdXY[1], sdXY[2], trunk)
 
-              as.double(coordinates(map)[,1]),       #x_snow
-              as.double(coordinates(map)[,2]),       #y_snow
-              use = as.double(getValues(map)),       #snow
-              as.integer(length(getValues(map))),    #pixels
-
-              as.double(c(sdXY[,1])),                # double sd_x[]
-              as.double(c(sdXY[,2])),                # double sd_y[]
-              as.double(c(trunk)),                   # double trunc_cutoff[]
-              package='rSPACE')$use
   return(USE)
   }
 

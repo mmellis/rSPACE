@@ -93,6 +93,7 @@ testReplicates<-function(folder, Parameters, ... ){
     overwrite    <-setDefault(additional.args$overwrite, F)
     add          <-setDefault(additional.args$add, F)
     randomize    <-setDefault(additional.args$randomize, T)
+    jttr       <-setDefault(additional.args$jttr, F)
 
 
    if(!skipConfirm){
@@ -195,6 +196,12 @@ testReplicates<-function(folder, Parameters, ... ){
   test<-drop_detP(test, detPt)  # cumulatively reduces the number of detections
   detPhold = detPhold * detPt
 
+  if(jttr){
+    n_grid_sample<-round(c(min(Parameters$grid_sample), 
+                           jitter(Parameters$grid_sample[-c(1,length(Parameters$grid_sample))],amount=0.05),
+                           max(Parameters$grid_sample))*gridTotal)
+    }
+    
   for(n_grid in n_grid_sample){
     suppressWarnings(rm("ch1"))
     ch1<-test[use[1:n_grid]]    # only include data from grids in sample
